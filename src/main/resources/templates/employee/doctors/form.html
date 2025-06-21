@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${doctor.id} ? 'Редактировать' : 'Создать' + ' врача'">Создать врача</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"  rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">DoctorPlus</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2 th:text="${doctor.id} ? 'Редактировать врача' : 'Создать нового врача'">Создать врача</h2>
+
+    <form th:action="@{/doctors}" th:object="${doctor}" method="post">
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Имя</label>
+            <input type="text" id="name" th:field="*{name}" class="form-control" />
+            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="specialty" class="form-label">Специализация</label>
+            <input type="text" id="specialty" th:field="*{specialty}" class="form-control" />
+            <span th:if="${#fields.hasErrors('specialty')}" th:errors="*{specialty}" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="/doctors" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

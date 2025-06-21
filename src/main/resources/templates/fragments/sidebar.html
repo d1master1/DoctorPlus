@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Sidebar</title></head>
+<body>
+
+<!-- Sidebar -->
+<div th:fragment="sidebar(activePage)" class="col-md-3 mb-4">
+    <div class="list-group list-group-flush">
+
+        <!-- Пациенты -->
+        <a href="/patients"
+           class="list-group-item list-group-item-action d-flex align-items-center"
+           th:classappend="${activePage == 'patients'} ? 'active'">
+            <i class="bi bi-person me-2"></i> Пациенты
+        </a>
+
+        <!-- Врачи -->
+        <a href="/doctors"
+           class="list-group-item list-group-item-action d-flex align-items-center"
+           th:classappend="${activePage == 'doctors'} ? 'active'">
+            <i class="bi bi-stethoscope me-2"></i> Врачи
+        </a>
+
+        <!-- Услуги -->
+        <a href="/services"
+           class="list-group-item list-group-item-action d-flex align-items-center"
+           th:classappend="${activePage == 'services'} ? 'active'">
+            <i class="bi bi-clipboard-pulse me-2"></i> Услуги
+        </a>
+
+        <!-- Записи -->
+        <a href="/appointments"
+           class="list-group-item list-group-item-action d-flex align-items-center"
+           th:classappend="${activePage == 'appointments'} ? 'active'">
+            <i class="bi bi-calendar-check me-2"></i> Записи
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>
