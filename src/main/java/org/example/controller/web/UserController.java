@@ -22,7 +22,6 @@ public class UserController {
         } catch (UsernameNotFoundException e) {
             return "redirect:/login";
         }
-
         return "user/profile";
     }
 }

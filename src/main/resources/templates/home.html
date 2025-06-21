@@ -53,8 +53,13 @@
             <p class="lead mb-4">Платформа для записи на приём к врачу онлайн</p>
 
             <!-- Отображение имени пользователя после входа -->
-            <h5 class="mt-4" sec:authorize="isAuthenticated()">Ваше имя:</h5>
-            <p class="fw-normal fs-5" th:text="${#authentication.name}" sec:authorize="isAuthenticated()"></p>
+            <div sec:authorize="isAuthenticated()">
+                <p>Имя пользователя: <strong th:text="${#authentication.principal.username}"></strong></p>
+            </div>
+
+            <div sec:authorize="!isAuthenticated()">
+                <p>Пожалуйста, войдите в систему.</p>
+            </div>
         </div>
     </div>
 </section>
