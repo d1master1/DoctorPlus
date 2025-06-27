@@ -21,29 +21,24 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(requests -> requests
-                        // Доступ для всех (гости)
                         .requestMatchers(
-                                "/", "/resources/**", "/register", "/login", "/include/registration/**", "/logout", "/webjars/**", "/css/**", "/img/**",
-                                "/js/**", "/images/**", "/fonts/**", "/header", "/footer", "/about", "/profile", "/profile/**", "/include/about", "/uploads/**"
+                                "/", "/resources/**", "/register", "/login", "/include/registration/**", "/logout",
+                                "/webjars/**", "/css/**", "/img/**", "/js/**", "/images/**", "/fonts/**",
+                                "/header", "/footer", "/about", "/profile", "/profile/**", "/include/about", "/uploads/**"
                         ).permitAll()
-
-                        // Только для авторизированных пользователей
-                        .requestMatchers( "/appointment/appointment_list", "/serving/serving_list")
+                        .requestMatchers("/appointment/appointment_list", "/serving/serving_list")
                         .authenticated()
-
-                        // Только доктора и админы
-                        .requestMatchers("/serving/serving_form", "/appointment/appointment_form", "/patient/patient_list", "/patient/patient_form")
+                        .requestMatchers("/serving/serving_form", "/appointment/appointment_form",
+                                "/patient/patient_list", "/patient/patient_form")
                         .hasAnyRole("DOCTOR", "ADMIN")
-
-                        // Только администраторы
-                        .requestMatchers("/doctor/doctor_form", "/doctor/doctor_list", "/user/user_list", "/user/user_form")
+                        .requestMatchers("/doctor/doctor_form", "/doctor/doctor_list",
+                                "/user/user_list", "/user/user_form")
                         .hasRole("ADMIN")
-
-                        // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
+                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/profile", true)
                         .failureUrl("/login?error")
                         .permitAll()
@@ -54,8 +49,9 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
-                );
+                )
+                .csrf(csrf -> csrf.disable());
 
-        return http.build();
+        return http.build(); // Вызываем build() только один раз!
     }
 }

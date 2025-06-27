@@ -1,6 +1,7 @@
 package org.example.doctorplus.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.example.doctorplus.model.*;
 import org.example.doctorplus.repo.AppointmentRepo;
 import org.example.doctorplus.repo.DoctorRepo;
@@ -9,8 +10,10 @@ import org.example.doctorplus.repo.ServingRepo;
 import org.example.doctorplus.service.AppointmentService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientRepo patientRepository;
     private final DoctorRepo doctorRepository;
     private final ServingRepo servingRepository;
+    @Setter
+    private AppointmentServiceImpl patientService;
 
     @Override
     public List<Appointment> getAllAppointments(Sort sort) {
@@ -57,12 +62,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Optional<Patient> findPatientById(Long id) {
-        return appointmentRepository.findById(id)
-                .map(appointment -> appointment.getPatient());
-    }
-
-    @Override
     public int deleteAllAppointments() {
         appointmentRepository.deleteAll();
         return 0;
@@ -87,11 +86,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<Appointment> findAllByUser(User user) {
-        return appointmentRepository.findByUser(user);
-    }
-
-    @Override
     public boolean existsByServing(Serving serving) {
         // Проверяем, есть ли приём с такой услугой
         return appointmentRepository.existsByServing(serving);
@@ -101,5 +95,22 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Optional<Patient> findPatientById(Long id) {
         return appointmentRepository.findById(id)
                 .map(Appointment::getPatient);
+    }
+
+    @Override
+    public Optional<Appointment> findById(Long id) {
+        return appointmentRepository.findById(id);
+    }
+
+    @Override
+    public List<Appointment> findAllByUser(User user) {
+        return patientRepository.findById(id);
+    }
+
+    @Override
+    public List<Appointment> findByPatientId(Long patientId) {
+        Appointment patient = patientService.findById(patientId).orElse(null);
+        if (patient == null) return Collections.emptyList();
+        return appointmentRepository.findByPatient(patient.getPatient());
     }
 }

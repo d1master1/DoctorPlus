@@ -22,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProfileController {
 
+    @Getter
     private final UserService userService;
     @Getter
     private final PatientService patientService;
@@ -45,4 +46,5 @@ public class ProfileController {
 
         return "include/profile";
     }
+
 }

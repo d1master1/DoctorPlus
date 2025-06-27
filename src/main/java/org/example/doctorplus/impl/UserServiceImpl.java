@@ -98,6 +98,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean existsByUsername(String username) {
+        return userRepo.existsByUsername(username);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepo.save(user);
+    }
+
+    @Override
     public Optional<User> findByUsername(String username) {
         return userRepo.findByUsername(username);
     }

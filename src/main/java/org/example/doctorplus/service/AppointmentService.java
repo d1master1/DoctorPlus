@@ -18,6 +18,7 @@ public interface AppointmentService {
     List<Appointment> getAllAppointments(String sortField, String sortDir);
     List<Appointment> findAllByUser(User user);
     boolean existsByServing(Serving serving);
-    Optional<Patient> findById(Long id);
+    Optional<Appointment> findById(Long id);
     Optional<Patient> findPatientById(Long id);
+    List<Appointment> findByPatientId(Long patientId);
 }

@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "patient")
+@Table(name = "patients")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,9 +23,9 @@ public class Patient {
     private String phone;
     private String email;
     private String address;
-
-    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    private Long userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

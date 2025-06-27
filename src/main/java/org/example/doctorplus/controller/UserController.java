@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.doctorplus.dto.UserDTO;
 import org.example.doctorplus.impl.AppointmentServiceImpl;
+import org.example.doctorplus.model.Appointment;
 import org.example.doctorplus.model.Patient;
 import org.example.doctorplus.model.Role;
 import org.example.doctorplus.model.User;
@@ -66,12 +67,12 @@ public class UserController {
 
     @GetMapping("/patient/edit/{id}")
     public String editPatientForm(@PathVariable Long id, Model model) throws JsonProcessingException {
-        Optional<Patient> optionalPatient = patientService.findById(id);
+        Optional<Appointment> optionalPatient = patientService.findById(id);
         if (optionalPatient.isEmpty()) {
             return "redirect:/patient?error=true";
         }
 
-        Patient patient = optionalPatient.get();
+        Appointment patient = optionalPatient.get();
 
         model.addAttribute("patient", patient);
         model.addAttribute("users", userService.findAll());
