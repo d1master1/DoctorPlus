@@ -4,11 +4,11 @@ import org.example.doctorplus.model.Serving;
 import org.example.doctorplus.service.AppointmentService;
 import org.example.doctorplus.service.PatientService;
 import org.example.doctorplus.service.ServingService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -27,34 +27,18 @@ public class ServingController {
         this.appointmentService = appointmentService;
     }
 
-    @GetMapping
-    public String listServings(
-            @RequestParam(required = false) String sortField,
-            @RequestParam(required = false) String sortDir,
-            Model model) {
+    @GetMapping("/serving")
+    public String listServings(Model model,
+                               @RequestParam(name = "sortField", required = false) String sortField,
+                               @RequestParam(name = "sortDir", required = false) String sortDir) {
 
-        List<Serving> servings = servingService.findAll();
+        Sort.Direction direction = (sortDir != null && sortDir.equalsIgnoreCase("desc"))
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
 
-        if (sortField != null && sortDir != null) {
-            Comparator<Serving> comparator = null;
-            switch (sortField) {
-                case "cost":
-                    comparator = Comparator.comparing(Serving::getCost);
-                    break;
-                case "name":
-                    comparator = Comparator.comparing(Serving::getName, String.CASE_INSENSITIVE_ORDER);
-                    break;
-            }
+        Sort sort = Sort.by(direction, sortField != null ? sortField : "name");
 
-            if (comparator != null) {
-                if ("desc".equalsIgnoreCase(sortDir)) {
-                    comparator = comparator.reversed();
-                }
-                servings.sort(comparator);
-            }
-        }
-
-        model.addAttribute("servings", servings);
+        model.addAttribute("servings", servingService.findAllSorted(sort));
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDir", sortDir);
 
@@ -87,27 +71,26 @@ public class ServingController {
         return "serving/serving_form";
     }
 
-    @PostMapping("/delete/{id}")
-    public String deleteServing(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        if (appointmentService.existsByServingId(id)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Невозможно удалить: услуга используется в приеме.");
+    @PostMapping("/serving/delete/{id}")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttrs) {
+        if (servingService.deleteByIdIfPossible(id)) {
+            redirectAttrs.addFlashAttribute("successMessage", "Услуга успешно удалена");
         } else {
-            servingService.deleteServing(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Услуга успешно удалена.");
+            redirectAttrs.addFlashAttribute("errorMessage", "Невозможно удалить: услуга используется");
         }
         return "redirect:/serving";
     }
 
-    @PostMapping("/delete")
-    public String deleteAllExceptWithAppointments(RedirectAttributes redirectAttributes) {
-        List<Serving> deleted = servingService.deleteAllExceptWithAppointments();
-        if (deleted.isEmpty()) {
-            redirectAttributes.addFlashAttribute("warningMessage", "Удаление невозможно: все услуги участвуют в приёмах.");
+    @PostMapping("/serving/deleteAll")
+    public String deleteAll(RedirectAttributes redirectAttrs) {
+        List<Serving> undeleted = servingService.deleteAllExceptWithAppointments();
+
+        if (!undeleted.isEmpty()) {
+            redirectAttrs.addFlashAttribute("warningMessage", "Не удалось удалить " + undeleted.size() + " услуг(и), так как они связаны с приемами");
         } else {
-            int deletedCount = deleted.size();
-            redirectAttributes.addFlashAttribute("warningMessage",
-                    "Были удалены все услуги, которые не находятся в приёмах. Количество удалённых: " + deletedCount);
+            redirectAttrs.addFlashAttribute("successMessage", "Все услуги удалены");
         }
+
         return "redirect:/serving";
     }
 }

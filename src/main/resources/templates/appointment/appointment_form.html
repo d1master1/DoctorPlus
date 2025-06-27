@@ -3,108 +3,203 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>DoctorPlus — Форма для приема</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
-</head>
-<body class="d-flex flex-column min-vh-100">
+    <title>DoctorPlus — Форма для приёма</title>
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"/>
+
+    <style>
+        body {
+            padding-top: 56px; /* отступ под header */
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Шапка -->
 <div th:replace="~{/include/header}"></div>
 
-<main class="flex-grow-1">
+<main class="flex-grow-1 py-4">
     <div class="container mt-5">
-        <h1 th:text="${appointment.id == null} ? 'Добавить прием' : 'Редактировать прием'"></h1>
-        <form th:action="@{/appointment/save}" th:object="${appointment}" method="post" novalidate>
-            <input type="hidden" th:field="*{id}"/>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
 
-            <!-- Дата -->
-            <div class="mb-3">
-                <label for="date" class="form-label">Дата и время</label>
-                <input type="datetime-local" id="date" class="form-control" th:field="*{date}" required/>
+                <!-- Заголовок формы -->
+                <h2 class="text-center mb-4"
+                    th:text="${appointment.id == null ? 'Добавить прием' : 'Редактировать прием'">
+                    Форма приёма
+                </h2>
+
+                <!-- Сообщения об ошибках -->
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" role="alert">
+                    Пожалуйста, исправьте ошибки ниже.
+                </div>
+
+                <!-- Форма приёма -->
+                <form th:action="@{/appointment/save}"
+                      th:object="${appointment}"
+                      method="post"
+                      novalidate
+                      class="needs-validation was-validated">
+
+                    <input type="hidden" th:field="*{id}" />
+
+                    <!-- Дата и время -->
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Дата и время</label>
+                        <input type="datetime-local"
+                               id="date"
+                               th:field="*{date}"
+                               class="form-control"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('date')}"
+                             th:text="${#fields.firstError('date')}">
+                            Укажите дату и время
+                        </div>
+                    </div>
+
+                    <!-- Статус -->
+                    <div class="mb-3">
+                        <label for="statusField" class="form-label">Статус</label>
+                        <select th:field="*{status}"
+                                id="statusField"
+                                class="form-select"
+                                required>
+                            <option value="">-- Выберите статус --</option>
+                            <option value="Запланирован">Запланирован</option>
+                            <option value="Выполнен">Выполнен</option>
+                            <option value="Отменен">Отменён</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}"
+                             th:text="${#fields.firstError('status')}">
+                            Выберите статус
+                        </div>
+                    </div>
+
+                    <!-- Пациент -->
+                    <div class="mb-3">
+                        <label for="patientSelect" class="form-label">Пациент</label>
+                        <select th:field="*{patient.id}"
+                                id="patientSelect"
+                                class="form-select"
+                                onchange="updatePatientFields()"
+                                required>
+                            <option value="">-- Выберите пациента --</option>
+                            <option th:each="pat : ${patients}"
+                                    th:value="${pat.id}"
+                                    th:selected="${pat.id == appointment.patient?.id}"
+                                    th:text="${pat.fullName}">
+                            </option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('patient')}"
+                             th:text="${#fields.firstError('patient')}">
+                            Выберите пациента
+                        </div>
+                    </div>
+
+                    <!-- Доктор -->
+                    <div class="mb-3">
+                        <label for="doctorSelect" class="form-label">Доктор</label>
+                        <select th:field="*{doctor.id}"
+                                id="doctorSelect"
+                                class="form-select"
+                                onchange="updateDoctorFields()"
+                                required>
+                            <option value="">-- Выберите доктора --</option>
+                            <option th:each="doc : ${doctors}"
+                                    th:value="${doc.id}"
+                                    th:selected="${doc.id == appointment.doctor?.id}"
+                                    th:text="${doc.fullName}">
+                            </option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('doctor')}"
+                             th:text="${#fields.firstError('doctor')}">
+                            Выберите доктора
+                        </div>
+                    </div>
+
+                    <!-- Услуга -->
+                    <div class="mb-3">
+                        <label for="servingSelect" class="form-label">Услуга</label>
+                        <select th:field="*{serving.id}"
+                                id="servingSelect"
+                                class="form-select"
+                                onchange="updateServingFields()"
+                                required>
+                            <option value="">-- Выберите услугу --</option>
+                            <option th:each="srv : ${servings}"
+                                    th:value="${srv.id}"
+                                    th:selected="${srv.id == appointment.serving?.id}"
+                                    th:text="${srv.name}">
+                            </option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('serving')}"
+                             th:text="${#fields.firstError('serving')}">
+                            Выберите услугу
+                        </div>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a th:href="@{/appointment}" class="btn btn-secondary ms-2">Отмена</a>
+                    </div>
+                </form>
             </div>
-
-            <!-- Статус -->
-            <div class="mb-3">
-                <label for="statusField" class="form-label">Статус</label>
-                <select th:field="*{status}" id="statusField" class="form-select" required>
-                    <option value="" disabled th:selected="${appointment.status == null}">Выберите статус</option>
-                    <option value="Запланирован" th:selected="${appointment.status == 'Запланирован'}">Запланирован</option>
-                    <option value="Выполнен" th:selected="${appointment.status == 'Выполнен'}">Выполнен</option>
-                    <option value="Отменен" th:selected="${appointment.status == 'Отменен'}">Отменен</option>
-                </select>
-                <div class="invalid-feedback">Выберите статус приема.</div>
-            </div>
-
-            <!-- Пациент -->
-            <div class="mb-3">
-                <label for="patientSelect" class="form-label">Пациент</label>
-                <select th:field="*{patient.id}" id="patientSelect" class="form-select" onchange="updatePatientFields()" required>
-                    <option value="">-- Выберите пациента --</option>
-                    <option th:each="patient : ${patients}"
-                            th:value="${patient.id}"
-                            th:text="${patient.fullName}"
-                            th:selected="${patient.id == appointment.patient?.id}">
-                    </option>
-                </select>
-            </div>
-
-            <!-- Доктор -->
-            <div class="mb-3">
-                <label for="doctorSelect" class="form-label">Доктор</label>
-                <select th:field="*{doctor.id}" id="doctorSelect" class="form-select" onchange="updateDoctorFields()" required>
-                    <option value="">-- Выберите доктора --</option>
-                    <option th:each="doctor : ${doctors}"
-                            th:value="${doctor.id}"
-                            th:text="${doctor.fullName}"
-                            th:selected="${doctor.id == appointment.doctor?.id}">
-                    </option>
-                </select>
-            </div>
-
-            <!-- Услуга -->
-            <div class="mb-3">
-                <label for="servingSelect" class="form-label">Услуга</label>
-                <select th:field="*{serving.id}" id="servingSelect" class="form-select" onchange="updateServingFields()" required>
-                    <option value="">-- Выберите услугу --</option>
-                    <option th:each="serving : ${servings}"
-                            th:value="${serving.id}"
-                            th:text="${serving.name}"
-                            th:selected="${serving.id == appointment.serving?.id}">
-                    </option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/appointment}" class="btn btn-secondary ms-2">Отмена</a>
-        </form>
+        </div>
     </div>
 </main>
 
-<!-- JSON данные для JS -->
-<div id="patientJson" th:attr="data-json=${patientJson}" hidden></div>
-<div id="doctorJson" th:attr="data-json=${doctorJson}" hidden></div>
-<div id="servingJson" th:attr="data-json=${servingJson}" hidden></div>
+<!-- Подвал -->
+<div th:replace="~{/include/footer}"></div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<!-- Валидация формы -->
 <script>
-    function updatePatientFields() {
-        const patientElement = document.getElementById("patientJson");
-        const data = patientElement ? patientElement.dataset.json : "[]";
-        const patientData = JSON.parse(data || "[]");
-        const selectedId = document.getElementById("patientSelect").value;
-        const patient = patientData.find(p => p.id == selectedId);
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".needs-validation");
 
-        // Пример обновления данных (можно расширить)
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add("was-validated");
+            }, false);
+        }
+    });
+
+    // Пример автозаполнения полей по ID
+    function updatePatientFields() {
+        const patientJson = document.getElementById("patientJson")?.dataset?.json;
+        const selectedId = document.getElementById("patientSelect").value;
+
+        if (!patientJson || !selectedId) return;
+
+        const patients = JSON.parse(patientJson);
+        const patient = patients.find(p => p.id == selectedId);
+
         if (patient) {
             console.log("Выбран пациент:", patient);
         }
     }
 
     function updateDoctorFields() {
-        const doctorElement = document.getElementById("doctorJson");
-        const data = doctorElement ? doctorElement.dataset.json : "[]";
-        const doctorData = JSON.parse(data || "[]");
+        const doctorJson = document.getElementById("doctorJson")?.dataset?.json;
         const selectedId = document.getElementById("doctorSelect").value;
-        const doctor = doctorData.find(d => d.id == selectedId);
+
+        if (!doctorJson || !selectedId) return;
+
+        const doctors = JSON.parse(doctorJson);
+        const doctor = doctors.find(d => d.id == selectedId);
 
         if (doctor) {
             console.log("Выбран доктор:", doctor);
@@ -112,11 +207,13 @@
     }
 
     function updateServingFields() {
-        const servingElement = document.getElementById("servingJson");
-        const data = servingElement ? servingElement.dataset.json : "[]";
-        const servingData = JSON.parse(data || "[]");
+        const servingJson = document.getElementById("servingJson")?.dataset?.json;
         const selectedId = document.getElementById("servingSelect").value;
-        const serving = servingData.find(s => s.id == selectedId);
+
+        if (!servingJson || !selectedId) return;
+
+        const servings = JSON.parse(servingJson);
+        const serving = servings.find(s => s.id == selectedId);
 
         if (serving) {
             console.log("Выбрана услуга:", serving);
@@ -124,7 +221,10 @@
     }
 </script>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
+<!-- JSON данные для JS -->
+<div id="patientJson" th:attr="data-json=${patientJson}" hidden></div>
+<div id="doctorJson" th:attr="data-json=${doctorJson}" hidden></div>
+<div id="servingJson" th:attr="data-json=${servingJson}" hidden></div>
+
 </body>
 </html>

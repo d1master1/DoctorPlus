@@ -2,7 +2,6 @@ package org.example.doctorplus.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Entity
@@ -28,14 +27,5 @@ public class Patient {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "user_id", nullable = true)
-    private User user;
-
-    public String getFullName() {
-        StringBuilder fullName = new StringBuilder();
-        if (surname != null) fullName.append(surname).append(" ");
-        if (name != null) fullName.append(name);
-        return fullName.toString().trim();
-    }
+    private Long userId;
 }

@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security6"
       lang="ru">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>DoctorPlus — Приемы</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"/>
+
     <style>
         body, html {
             height: 100%;
@@ -21,10 +26,6 @@
             height: 100vh;
             position: fixed;
             padding-top: 1rem;
-        }
-
-        .sidebar .nav-link {
-            margin: 0.3rem 0;
         }
 
         .header {
@@ -48,8 +49,8 @@
 
         .btn-edit {
             background-color: #fff176;
-            border-color: #fff176;
             color: #000;
+            border-color: #fff176;
         }
 
         .btn-edit:hover {
@@ -59,8 +60,8 @@
 
         .btn-delete {
             background-color: #f44336;
-            border-color: #f44336;
             color: #fff;
+            border-color: #f44336;
         }
 
         .btn-delete:hover {
@@ -84,18 +85,19 @@
         }
     </style>
 </head>
-<body>
+<body class="bg-light">
+
 <!-- Боковое меню -->
 <div th:replace="~{/include/sidebar :: sidebar}"></div>
 
 <header class="header">
     <div>DoctorPlus — Приемы</div>
     <div class="d-flex gap-2 align-items-center">
-        <!-- Кнопки "Добавить" и "Удалить всех" -->
+        <!-- Кнопки "Добавить" и "Удалить все" -->
         <div sec:authorize="hasAnyRole('DOCTOR','ADMIN')" class="d-flex align-items-center gap-2">
             <a th:href="@{/appointment/add}" class="btn btn-primary">Добавить</a>
             <form th:action="@{/appointment/deleteAll}" method="post" style="display: inline;"
-                  onsubmit="return confirm('Удалить все приемы?');">
+                  onsubmit="return confirm('Вы уверены, что хотите удалить все приемы?');">
                 <button type="submit" class="btn btn-danger">Удалить все</button>
             </form>
         </div>
@@ -108,25 +110,34 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="sortDropdown">
                 <li><a class="dropdown-item" th:href="@{/appointment(sortField='date', sortDir='asc')}"
-                       th:classappend="${sortField == 'date' and sortDir == 'asc'} ? ' active' : ''">Дата ↑</a></li>
+                       th:classappend="${sortField == 'date' and sortDir == 'asc'} ? ' active' : ''">
+                    Дата ↑
+                </a></li>
                 <li><a class="dropdown-item" th:href="@{/appointment(sortField='date', sortDir='desc')}"
-                       th:classappend="${sortField == 'date' and sortDir == 'desc'} ? ' active' : ''">Дата ↓</a></li>
+                       th:classappend="${sortField == 'date' and sortDir == 'desc'} ? ' active' : ''">
+                    Дата ↓
+                </a></li>
                 <li><hr class="dropdown-divider"/></li>
                 <li><a class="dropdown-item" th:href="@{/appointment}"
-                       th:classappend="${sortField == null} ? ' active' : ''">Без сортировки</a></li>
+                       th:classappend="${sortField == null or sortField == ''} ? ' active' : ''">
+                    Без сортировки
+                </a></li>
             </ul>
         </div>
     </div>
 </header>
 
 <main class="content">
+    <!-- Сообщения об ошибках -->
     <div th:if="${param.error}" class="alert alert-danger text-center" role="alert">
-        Невозможно удалить прием — он связан с данными.
+        Невозможно удалить приём — он связан с услугой или доктором.
     </div>
+
     <div th:if="${param.partialError}" class="alert alert-warning text-center" role="alert">
         Удалены только неиспользуемые записи.
     </div>
 
+    <!-- Таблица приёмов -->
     <table class="table table-bordered table-hover table-striped align-middle text-center">
         <thead class="table-light">
         <tr>
@@ -140,37 +151,48 @@
         </thead>
         <tbody>
         <tr th:each="appointment : ${appointments}">
-            <td th:text="${appointment.getFormattedDate()}"></td>
-            <td th:text="${appointment.status}"></td>
-            <td th:text="${appointment.patient.fullName}"></td>
-            <td th:text="${appointment.doctor.fullName}"></td>
-            <td th:text="${appointment.serving.name}"></td>
+            <td th:text="${appointment.getFormattedDate()} ?: '-'">Дата</td>
+            <td th:text="${appointment.status} ?: '-'">Статус</td>
+            <td th:text="${appointment.patient.fullName} ?: '-'">Пациент</td>
+            <td th:text="${appointment.doctor.fullName} ?: '-'">Доктор</td>
+            <td th:text="${appointment.serving.name} ?: '-'">Услуга</td>
             <td sec:authorize="hasAnyRole('DOCTOR','ADMIN')">
-                <a th:href="@{/appointment/edit/{id}(id=${appointment.id})}" class="btn btn-sm btn-edit me-1">Изменить</a>
+                <a th:href="@{/appointment/edit/{id}(id=${appointment.id})"
+                   class="btn btn-edit btn-sm me-1">
+                    Изменить
+                </a>
+
                 <form th:id="'deleteForm_' + ${appointment.id}"
                       th:action="@{/appointment/delete/{id}(id=${appointment.id})"
-                      method="post" style="display: inline-block;"
-                      onsubmit="return confirm('Удалить прием?');">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <button type="submit" class="btn btn-delete btn-sm">Удалить</button>
+                      method="post"
+                      style="display: inline-block;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit"
+                            class="btn btn-delete btn-sm"
+                            onclick="return confirm('Вы уверены, что хотите удалить этот приём?');">
+                        Удалить
+                    </button>
                 </form>
-                <div th:id="'deleteConfirm_' + ${appointment.id}" class="delete-confirmation" style="display:none; margin-top: 0.3rem;">
-                    <span>Удалить прием?</span>
-                    <button type="button" class="btn btn-sm btn-danger ms-2" th:attr="onclick=|submitDeleteForm(${appointment.id})|">Подтвердить</button>
-                    <button type="button" class="btn btn-sm btn-secondary ms-1" th:attr="onclick=|hideDeleteConfirm(${appointment.id})|">Отмена</button>
-                </div>
             </td>
         </tr>
+
+        <!-- Если список пуст -->
         <tr th:if="${#lists.isEmpty(appointments)}">
-            <td colspan="6" class="text-center text-muted">Приемы отсутствуют</td>
+            <td colspan="6" class="text-muted text-center">Приёмы отсутствуют</td>
         </tr>
         </tbody>
     </table>
 </main>
 
+<!-- Подвал -->
+<div th:replace="~{/include/footer}"></div>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
+<!-- JS для подтверждения удаления -->
 <script>
     function submitDeleteForm(id) {
         document.getElementById('deleteForm_' + id).submit();
@@ -180,5 +202,6 @@
         document.getElementById('deleteConfirm_' + id).style.display = 'none';
     }
 </script>
+
 </body>
 </html>

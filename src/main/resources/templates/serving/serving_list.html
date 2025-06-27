@@ -6,8 +6,14 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>DoctorPlus — Услуги</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"/>
+
+    <!-- Стили -->
     <style>
         body, html {
             height: 100%;
@@ -82,33 +88,39 @@
         }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100 bg-light">
 
 <!-- Боковое меню -->
 <div th:replace="~{/include/sidebar :: sidebar}"></div>
 
+<!-- Заголовок -->
 <header class="header">
     <div>DoctorPlus — Услуги</div>
     <div class="d-flex gap-2 align-items-center">
-        <!-- Кнопки "Добавить" и "Удалить всех" -->
+        <!-- Кнопки "Добавить" и "Удалить все" -->
         <div sec:authorize="hasAnyRole('DOCTOR','ADMIN')" class="d-flex align-items-center gap-2">
             <a th:href="@{/serving/add}" class="btn btn-primary">Добавить</a>
             <form th:action="@{/serving/deleteAll}" method="post" style="display: inline;"
-                  onsubmit="return confirm('Удалить все услуги?');">
+                  onsubmit="return confirm('Вы уверены, что хотите удалить все услуги?');">
                 <button type="submit" class="btn btn-danger">Удалить все</button>
             </form>
         </div>
     </div>
 </header>
 
+<!-- Основной контент -->
 <main class="content">
+    <!-- Сообщения об ошибках -->
     <div th:if="${param.error}" class="alert alert-danger text-center" role="alert">
-        Невозможно удалить услугу — она связана с приемом.
-    </div>
-    <div th:if="${param.partialError}" class="alert alert-warning text-center" role="alert">
-        Удалены только неиспользуемые записи.
+        Невозможно удалить услугу — она связана с приёмом.
     </div>
 
+    <div th:if="${param.partialError}" class="alert alert-warning text-center" role="alert">
+        Удалены только неиспользуемые услуги.<br/>
+        <span th:text="'Не удалось удалить ' + ${param.partialError} + ' записей'"></span>
+    </div>
+
+    <!-- Таблица -->
     <table class="table table-bordered table-hover table-striped align-middle text-center">
         <thead class="table-light">
         <tr>
@@ -123,33 +135,41 @@
         <tbody>
         <tr th:each="serving : ${servings}">
             <td th:text="${serving.name}">Название</td>
-            <td th:text="${serving.description}">Описание</td>
-            <td th:text="${serving.formattedCost}">Стоимость</td>
+            <td th:text="${serving.description} ?: '—'">Описание</td>
+            <td th:text="${serving.formattedCost} ?: '—'">Стоимость</td>
             <td th:text="${serving.patient != null ? serving.patient.fullName : '—'}">Пациент</td>
-            <td th:text="${serving.createdAt.format(java.time.format.DateTimeFormatter.ofPattern('dd.MM.yyyy'))}">Дата создания</td>
+            <td th:text="${#temporals.format(serving.createdAt, 'dd.MM.yyyy')} ?: '—'">Дата создания</td>
             <td sec:authorize="hasAnyRole('DOCTOR','ADMIN')">
                 <a th:href="@{/serving/edit/{id}(id=${serving.id})}" class="btn btn-edit btn-sm me-1">Изменить</a>
+
                 <form th:id="'deleteForm_' + ${serving.id}"
                       th:action="@{/serving/delete/{id}(id=${serving.id})"
-                      method="post" style="display: inline-block;"
-                      onsubmit="return confirm('Удалить услугу?');">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                      method="post"
+                      style="display: inline-block;"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить эту услугу?');">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="btn btn-delete btn-sm">Удалить</button>
                 </form>
-                <div th:id="'deleteConfirm_' + ${serving.id}" class="delete-confirmation" style="display:none; margin-top: 0.3rem;">
-                    <span>Удалить услугу?</span>
-                    <button type="button" class="btn btn-sm btn-danger ms-2" th:attr="onclick=|submitDeleteForm(${serving.id})|">Подтвердить</button>
-                    <button type="button" class="btn btn-sm btn-secondary ms-1" th:attr="onclick=|hideDeleteConfirm(${serving.id})|">Отмена</button>
-                </div>
             </td>
         </tr>
+
+        <!-- Если нет данных -->
         <tr th:if="${#lists.isEmpty(servings)}">
-            <td colspan="6" class="text-center text-muted">Услуги отсутствуют</td>
+            <td colspan="6" class="text-muted">Услуги отсутствуют</td>
         </tr>
         </tbody>
     </table>
 </main>
 
+<!-- Подвал -->
+<div th:replace="~{/include/footer}"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<!-- JS подтверждения удаления -->
 <script>
     function submitDeleteForm(id) {
         document.getElementById('deleteForm_' + id).submit();
@@ -159,13 +179,6 @@
         document.getElementById('deleteConfirm_' + id).style.display = 'none';
     }
 </script>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
 
 </body>
 </html>

@@ -16,10 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/appointment")
@@ -31,6 +28,7 @@ public class AppointmentController {
     private final DoctorService doctorService;
     private final ServingService servingService;
 
+    // --- Список приёмов ---
     @GetMapping
     public String listAppointments(
             Model model,
@@ -40,92 +38,92 @@ public class AppointmentController {
         Sort sort;
         if (sortField == null || sortField.isEmpty()) {
             sort = Sort.unsorted();
+            sortField = "date";
+            sortDir = "asc";
         } else {
-            try {
-                Sort.Direction direction = (sortDir == null || (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc")))
-                        ? Sort.Direction.ASC
-                        : Sort.Direction.fromString(sortDir);
-                sort = Sort.by(direction, sortField);
-            } catch (IllegalArgumentException ex) {
-                sort = Sort.by(Sort.Direction.ASC, "date");
-                sortField = "date";
-                sortDir = "asc";
-            }
+            sortDir = (sortDir != null && sortDir.equalsIgnoreCase("desc")) ? "desc" : "asc";
+            sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
         }
+
         List<Appointment> appointments = appointmentService.getAllAppointments(sort);
+
         model.addAttribute("appointments", appointments);
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDir", sortDir);
-        model.addAttribute("reverseSortDir", (sortDir != null && sortDir.equalsIgnoreCase("asc")) ? "desc" : "asc");
+        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
+
         return "appointment/appointment_list";
     }
 
+    // --- Форма добавления/редактирования ---
+    @GetMapping({"/add", "/edit/{id}"})
+    public String showAppointmentForm(@PathVariable(required = false) Long id,
+                                      Model model) {
+
+        // Получаем приём или создаём новый
+        Appointment appointment = (id != null)
+                ? appointmentService.findById(id).orElse(new Appointment())
+                : new Appointment();
+
+        // Получаем данные для формы
+        List<Patient> patients = patientService.findAll();
+        List<Doctor> doctors = doctorService.findAll();
+        List<Serving> servings = servingService.findAll();
+
+        // Передаём данные в модель
+        model.addAttribute("appointment", appointment);
+        model.addAttribute("patients", patients);
+        model.addAttribute("doctors", doctors);
+        model.addAttribute("servings", servings);
+
+        // Подготавливаем JSON для автозаполнения через JS
+        model.addAttribute("patientJson", toJson(patients));
+        model.addAttribute("doctorJson", toJson(doctors));
+        model.addAttribute("servingJson", toJson(servings));
+
+        return "appointment/appointment_form";
+    }
+
+    // Вспомогательный метод для конвертации объектов в JSON
+    private String toJson(List<?> list) {
+        try {
+            return new ObjectMapper().writeValueAsString(list);
+        } catch (JsonProcessingException e) {
+            return "[]"; // безопасный fallback
+        }
+    }
+
+    // --- Сохранение приёма ---
     @PostMapping("/save")
     public String saveAppointment(@ModelAttribute Appointment appointment) {
         appointmentService.saveAppointment(appointment);
         return "redirect:/appointment";
     }
 
-    @GetMapping({"/add", "/edit/{id}"})
-    public String showAppointmentForm(@PathVariable(required = false) Long id, Model model) throws JsonProcessingException {
-        Appointment appointment = (id != null) ? appointmentService.findById(id).orElse(new Appointment()) : new Appointment();
-        List<Patient> patients = patientService.findAll();
-        List<Doctor> doctors = doctorService.findAll();
-        List<Serving> servings = servingService.findAll();
-
-        model.addAttribute("appointment", appointment);
-        model.addAttribute("patients", patients);
-        model.addAttribute("doctors", doctors);
-        model.addAttribute("servings", servings);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        List<Map<String, Object>> patientJsonList = patients.stream().map(p -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", p.getId());
-            map.put("phone", p.getPhone());
-            return map;
-        }).collect(Collectors.toList());
-
-        List<Map<String, Object>> doctorJsonList = doctors.stream().map(d -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", d.getId());
-            map.put("fullName", d.getFullName());
-            return map;
-        }).collect(Collectors.toList());
-
-        List<Map<String, Object>> servingJsonList = servings.stream().map(s -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", s.getId());
-            map.put("name", s.getName());
-            return map;
-        }).collect(Collectors.toList());
-
-        model.addAttribute("patientJson", objectMapper.writeValueAsString(patientJsonList));
-        model.addAttribute("doctorJson", objectMapper.writeValueAsString(doctorJsonList));
-        model.addAttribute("servingJson", objectMapper.writeValueAsString(servingJsonList));
-
-        return "appointment/appointment_form";
-    }
-
+    // --- Удаление приёма ---
     @PostMapping("/delete/{id}")
-    public String deleteAppointment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deleteAppointment(@PathVariable Long id, RedirectAttributes redirectAttrs) {
         try {
             appointmentService.deleteAppointment(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Прием успешно удален");
+            redirectAttrs.addFlashAttribute("successMessage", "Приём успешно удалён");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении приема");
+            redirectAttrs.addFlashAttribute("errorMessage", "Ошибка при удалении приёма");
         }
         return "redirect:/appointment";
     }
 
+    // --- Массовое удаление ---
     @PostMapping("/deleteAll")
-    public String deleteAllAppointments(RedirectAttributes redirectAttributes) {
+    public String deleteAllAppointments(RedirectAttributes redirectAttrs) {
         try {
-            appointmentService.deleteAllAppointments();
-            redirectAttributes.addFlashAttribute("successMessage", "Все приемы успешно удалены");
+            int deletedCount = appointmentService.deleteAllAppointments();
+            if (deletedCount > 0) {
+                redirectAttrs.addFlashAttribute("successMessage", deletedCount + " приём(ов) удалено");
+            } else {
+                redirectAttrs.addFlashAttribute("warningMessage", "Нет записей для удаления");
+            }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении всех приемов");
+            redirectAttrs.addFlashAttribute("errorMessage", "Ошибка при массовом удалении");
         }
         return "redirect:/appointment";
     }

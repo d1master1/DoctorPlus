@@ -1,36 +1,37 @@
 package org.example.doctorplus.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.example.doctorplus.dto.PatientDTO;
+import org.example.doctorplus.impl.PatientServiceImpl;
 import org.example.doctorplus.model.Patient;
-import org.example.doctorplus.model.User;
 import org.example.doctorplus.service.PatientService;
-import org.example.doctorplus.service.UserService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
 
+@Setter
 @Controller
 @RequestMapping("/patient")
 @RequiredArgsConstructor
 public class PatientController {
 
     private final PatientService patientService;
-    private final UserService userService;
+    private PatientServiceImpl userService;
 
-    // Отображает список пациентов
+    // Список пациентов
     @GetMapping
     public String listPatients(Model model,
                                @RequestParam(required = false) String sortField,
                                @RequestParam(required = false) String sortDir) {
-        List<Patient> patients;
         String direction = (sortDir != null && sortDir.equalsIgnoreCase("desc")) ? "desc" : "asc";
 
+        List<Patient> patients;
         if (sortField == null || sortField.isBlank()) {
             patients = patientService.findAll();
             sortField = null;
@@ -46,32 +47,55 @@ public class PatientController {
         return "patient/patient_list";
     }
 
-    // Форма добавления пациента
-    @GetMapping("/add")
-    public String addPatientForm(Model model) {
-        model.addAttribute("patient", new Patient());
-        return "patient/patient_form";
-    }
-
-    // Сохранение нового/редактируемого пациента
+    // Сохранение пациента
     @PostMapping("/save")
-    public String savePatient(@Valid @ModelAttribute("patient") Patient patient,
+    public String savePatient(@Valid @ModelAttribute("patient") PatientDTO patientDTO,
                               BindingResult result) {
+
         if (result.hasErrors()) {
             return "patient/patient_form";
         }
+
+        Patient patient = new Patient();
+        patient.setId(patientDTO.getId());
+        patient.setName(patientDTO.getName());
+        patient.setSurname(patientDTO.getSurname());
+        patient.setPatronymic(patientDTO.getPatronymic());
+        patient.setPassport(patientDTO.getPassport());
+        patient.setPhone(patientDTO.getPhone());
+        patient.setEmail(patientDTO.getEmail());
+        patient.setAddress(patientDTO.getAddress());
+        patient.setBirthDate(patientDTO.getBirthDate());
+
         patientService.save(patient);
+
         return "redirect:/patient";
     }
 
-    // Редактирование пациента по ID
+    @GetMapping("/add")
+    public String showAddForm(Model model) throws JsonProcessingException {
+        model.addAttribute("patient", new Patient());
+        model.addAttribute("users", userService.findAll());
+
+        ObjectMapper mapper = new ObjectMapper();
+        model.addAttribute("userJson", mapper.writeValueAsString(userService.findAll()));
+
+        return "patient/patient_form";
+    }
+
     @GetMapping("/edit/{id}")
-    public String editPatientForm(@PathVariable Long id, Model model) {
-        Optional<Patient> patientOpt = patientService.findById(id);
-        if (patientOpt.isEmpty()) {
-            return "redirect:/patient";
+    public String editPatientForm(@PathVariable Long id, Model model) throws JsonProcessingException {
+        Patient patient = patientService.findById(id).orElse(null);
+        if (patient == null) {
+            return "redirect:/patient?error=true";
         }
-        model.addAttribute("patient", patientOpt.get());
+
+        model.addAttribute("patient", patient);
+        model.addAttribute("users", userService.findAll());
+
+        ObjectMapper mapper = new ObjectMapper();
+        model.addAttribute("userJson", mapper.writeValueAsString(userService.findAll()));
+
         return "patient/patient_form";
     }
 
@@ -90,54 +114,5 @@ public class PatientController {
             return "redirect:/patient?partialError=" + notDeletedCount;
         }
         return "redirect:/patient";
-    }
-
-    // Просмотр профиля текущего пользователя
-    @GetMapping("/profile")
-    public String viewProfile(Principal principal, Model model) {
-        String username = principal.getName();
-        User user = userService.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-
-        Patient patient = patientService.findByUser(user).orElseGet(() -> {
-            Patient newPatient = new Patient();
-            newPatient.setUser(user);
-            return newPatient;
-        });
-
-        model.addAttribute("user", user);
-        model.addAttribute("patient", patient);
-        return "include/profile";
-    }
-
-    // Редактирование профиля текущего пользователя
-    @PostMapping("/profile/edit")
-    public String updateProfile(@Valid @ModelAttribute("patient") Patient patient,
-                                BindingResult result,
-                                Principal principal) {
-        if (result.hasErrors()) {
-            return "include/profile";
-        }
-
-        // Обновляем данные пациента
-        Optional<User> optionalUser = userService.findByUsername(principal.getName());
-        if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("Пользователь не найден");
-        }
-
-        Patient existingPatient = patientService.findByUser(optionalUser.get())
-                .orElseGet(Patient::new);
-
-        // Перезаписываем поля
-        existingPatient.setName(patient.getName());
-        existingPatient.setSurname(patient.getSurname());
-        existingPatient.setEmail(patient.getEmail());
-        existingPatient.setPhone(patient.getPhone());
-        existingPatient.setPassport(patient.getPassport());
-        existingPatient.setAddress(patient.getAddress());
-        existingPatient.setBirthDate(patient.getBirthDate());
-
-        patientService.save(existingPatient);
-        return "redirect:/patient/profile";
     }
 }

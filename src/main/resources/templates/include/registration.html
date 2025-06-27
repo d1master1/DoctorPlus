@@ -33,56 +33,48 @@
 
     <!-- Форма регистрации -->
     <form th:action="@{/register}" method="post" th:object="${userDTO}" novalidate>
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <input type="hidden" th:field="*{id}" />
 
         <!-- Логин -->
         <div class="mb-3">
             <label for="username">Логин</label>
-            <input type="text" class="form-control" id="username" th:field="*{username}" required minlength="3" maxlength="20"/>
+            <input type="text" id="username" th:field="*{username}" class="form-control" required />
             <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}"
-                 th:text="${#fields.firstError('username')}">Ошибка</div>
+                 th:text="${#fields.firstError('username')}"></div>
         </div>
 
         <!-- Имя -->
         <div class="mb-3">
             <label for="name">Имя</label>
-            <input type="text" class="form-control" id="name" th:field="*{name}" required/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}"
-                 th:text="${#fields.firstError('name')}">Ошибка</div>
+            <input type="text" id="name" th:field="*{name}" class="form-control" required />
         </div>
 
         <!-- Фамилия -->
         <div class="mb-3">
             <label for="surname">Фамилия</label>
-            <input type="text" class="form-control" id="surname" th:field="*{surname}" required/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('surname')}"
-                 th:text="${#fields.firstError('surname')}">Ошибка</div>
+            <input type="text" id="surname" th:field="*{surname}" class="form-control" required />
         </div>
 
         <!-- Пароль -->
         <div class="mb-3">
             <label for="password">Пароль</label>
-            <input type="password" class="form-control" id="password" th:field="*{password}" required minlength="8" maxlength="20"/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}"
-                 th:text="${#fields.firstError('password')}">Ошибка</div>
+            <input type="password" id="password" th:field="*{password}" class="form-control" required minlength="8"/>
         </div>
 
         <!-- Подтверждение пароля -->
         <div class="mb-3">
             <label for="confirmPassword">Подтвердите пароль</label>
-            <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" required minlength="8" maxlength="20"/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}"
-                 th:text="${#fields.firstError('confirmPassword')}">Ошибка</div>
+            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" required minlength="8"/>
         </div>
 
-        <!-- Сообщение об ошибке совпадения паролей -->
-        <div th:if="${passwordMismatch}" class="alert alert-danger" role="alert">
+        <!-- Сообщение о несовпадении паролей -->
+        <div th:if="${passwordMismatch}" class="alert alert-danger mt-3">
             <span th:text="${passwordMismatch}"></span>
         </div>
 
-        <!-- Кнопки -->
+        <!-- Кнопка регистрации -->
         <button type="submit" class="btn btn-success w-100">Зарегистрироваться</button>
-        <a th:href="@{/}" class="btn btn-secondary w-100 mt-3">← На главную</a>
+        <a href="/login" class="btn btn-secondary w-100 mt-3">На главную</a>
     </form>
 </div>
 

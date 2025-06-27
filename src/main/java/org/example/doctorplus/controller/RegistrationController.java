@@ -15,56 +15,40 @@ public class RegistrationController {
 
     private final UserService userService;
 
-    @GetMapping("/login")
-    public String loginForm(Model model) {
-        model.addAttribute("user", new UserDTO());
-        return "include/login";
-    }
-
-    @PostMapping("/include/registration/save")
-    public String registerUser(
-            @Valid @ModelAttribute("user") UserDTO userDTO,
-            BindingResult result,
-            Model model) {
-        if (result.hasErrors()) {
-            return "include/registration";
-        }
-
-        if (!userService.isUsernameAvailable(userDTO.getUsername())) {
-            model.addAttribute("usernameError", "Логин уже занят");
-            return "include/registration";
-        }
-
-        if (!userDTO.getPassword().equals(userDTO.getConfirmPassword())) {
-            model.addAttribute("passwordMismatch", "Пароли не совпадают");
-            return "include/registration";
-        }
-
-        userService.save(userDTO);
-        return "redirect:/login";
-    }
-
-    @GetMapping
+    // Форма регистрации
+    @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("userDTO", new UserDTO());
         return "include/registration";
     }
 
+    // Обработка формы регистрации
     @PostMapping("/register")
-    public String register(@Valid @ModelAttribute("user") UserDTO userDTO,
+    public String register(@Valid @ModelAttribute("userDTO") UserDTO dto,
                            BindingResult result,
                            Model model) {
-
         if (result.hasErrors()) {
             return "include/registration";
         }
 
-        if (!userDTO.isPasswordConfirmed()) {
+        if (!userService.isUsernameAvailable(dto.getUsername())) {
+            model.addAttribute("usernameError", "Логин уже занят");
+            return "include/registration";
+        }
+
+        if (!dto.isPasswordConfirmed()) {
             model.addAttribute("passwordMismatch", "Пароли не совпадают");
             return "include/registration";
         }
 
-        userService.save(userDTO); // сохраняет только username, name, surname, password и роли
+        userService.save(dto);
         return "redirect:/login?success";
+    }
+
+    // Форма входа
+    @GetMapping("/login")
+    public String loginForm(Model model) {
+        model.addAttribute("user", new UserDTO());
+        return "include/login";
     }
 }

@@ -4,82 +4,161 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>DoctorPlus — Форма для услуги</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"/>
-</head>
-<body class="d-flex flex-column min-vh-100">
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"/>
+
+    <style>
+        body {
+            padding-top: 56px;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<!-- Шапка -->
 <div th:replace="~{/include/header}"></div>
 
-<main class="flex-grow-1">
+<main class="flex-grow-1 py-4">
     <div class="container mt-5">
-        <h1 th:text="${serving.id == null} ? 'Добавить услугу' : 'Редактировать услугу'">Форма услуги</h1>
-        <form th:action="@{/serving/save}" th:object="${serving}" method="post" novalidate>
-            <input type="hidden" th:field="*{id}"/>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
 
-            <!-- Название -->
-            <div class="mb-3">
-                <label for="name" class="form-label">Название:</label>
-                <input type="text" class="form-control" id="name" th:field="*{name}" required/>
-                <div class="invalid-feedback">Введите название услуги.</div>
+                <!-- Заголовок формы -->
+                <h1 class="text-center mb-4"
+                    th:text="${serving.id == null} ? 'Добавить услугу' : 'Редактировать услугу'">
+                    Форма услуги
+                </h1>
+
+                <!-- Сообщение об ошибке -->
+                <div th:if="${param.error}" class="alert alert-danger text-center" role="alert">
+                    Услуга не может быть удалена — она связана с приёмом.
+                </div>
+
+                <!-- Форма услуги -->
+                <form th:action="@{/serving/save}"
+                      th:object="${serving}"
+                      method="post"
+                      novalidate
+                      class="needs-validation was-validated">
+
+                    <input type="hidden" th:field="*{id}" />
+
+                    <!-- Название услуги -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название:</label>
+                        <input type="text"
+                               id="name"
+                               th:field="*{name}"
+                               class="form-control"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}"
+                             th:text="${#fields.firstError('name')}">
+                            Введите название услуги
+                        </div>
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание:</label>
+                        <textarea id="description"
+                                  th:field="*{description}"
+                                  class="form-control"
+                                  rows="3"
+                                  required></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                             th:text="${#fields.firstError('description')}">
+                            Введите описание услуги
+                        </div>
+                    </div>
+
+                    <!-- Стоимость -->
+                    <div class="mb-3">
+                        <label for="cost" class="form-label">Стоимость (₽):</label>
+                        <input type="number"
+                               step="0.01"
+                               id="cost"
+                               th:field="*{cost}"
+                               class="form-control"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('cost')}"
+                             th:text="${#fields.firstError('cost')}">
+                            Укажите стоимость
+                        </div>
+                    </div>
+
+                    <!-- Пациент -->
+                    <div class="mb-3">
+                        <label for="patientSelect" class="form-label">Пациент:</label>
+                        <select class="form-select"
+                                id="patientSelect"
+                                th:field="*{patient.id}"
+                                required>
+                            <option value="">— Не выбрано —</option>
+                            <option th:each="pat : ${patients}"
+                                    th:value="${pat.id}"
+                                    th:text="${pat.fullName}"
+                                    th:selected="${pat.id == serving.patient?.id}">
+                            </option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('patient')}"
+                             th:text="${#fields.firstError('patient')}">
+                            Выберите пациента
+                        </div>
+                    </div>
+
+                    <!-- Прием -->
+                    <div class="mb-3">
+                        <label for="appointmentSelect" class="form-label">Прием:</label>
+                        <select class="form-select"
+                                id="appointmentSelect"
+                                th:field="*{appointment.id}">
+                            <option value="">— Не выбрано —</option>
+                            <option th:each="app : ${appointments}"
+                                    th:value="${app.id}"
+                                    th:text="${'Прием от ' + app.getFormattedDate()}"
+                                    th:selected="${app.id == serving.appointment?.id}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a th:href="@{/serving}" class="btn btn-secondary ms-2">Отмена</a>
+                    </div>
+                </form>
             </div>
-
-            <!-- Описание -->
-            <div class="mb-3">
-                <label for="description" class="form-label">Описание:</label>
-                <textarea class="form-control" id="description" rows="3" th:field="*{description}" required></textarea>
-                <div class="invalid-feedback">Введите описание услуги.</div>
-            </div>
-
-            <!-- Стоимость -->
-            <div class="mb-3">
-                <label for="cost" class="form-label">Стоимость (₽):</label>
-                <input type="number" step="0.01" class="form-control" id="cost" th:field="*{cost}" required/>
-                <div class="invalid-feedback">Укажите стоимость услуги.</div>
-            </div>
-
-            <!-- Пациент -->
-            <div class="mb-3">
-                <label for="patientSelect" class="form-label">Пациент:</label>
-                <select class="form-select" id="patientSelect" th:field="*{patient.id}">
-                    <option value="">— Не выбрано —</option>
-                    <option th:each="patient : ${patients}"
-                            th:value="${patient.id}"
-                            th:selected="${patient.id == serving.patient?.id}"
-                            th:text="${patient.fullName}">
-                    </option>
-                </select>
-            </div>
-
-            <!-- Прием -->
-            <div class="mb-3">
-                <label for="appointmentSelect" class="form-label">Прием:</label>
-                <select class="form-select" id="appointmentSelect" th:field="*{appointment.id}">
-                    <option value="">— Не выбрано —</option>
-                    <option th:each="appointment : ${appointments}"
-                            th:value="${appointment.id}"
-                            th:selected="${appointment.id == serving.appointment?.id}"
-                            th:text="${'Прием от ' + appointment.getFormattedDate()}">
-                    </option>
-                </select>
-            </div>
-
-            <!-- Кнопки -->
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/serving}" class="btn btn-secondary ms-2">Отмена</a>
-        </form>
-
-        <!-- Сообщения об ошибках валидации -->
-        <th:block th:if="${param.error}">
-            <div class="alert alert-danger mt-3 text-center" role="alert">
-                Услуга не может быть удалена — она связана с приемом.
-            </div>
-        </th:block>
+        </div>
     </div>
 </main>
 
+<!-- Подвал -->
+<div th:replace="~{/include/footer}"></div>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
+<!-- JS валидации формы -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".needs-validation");
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add("was-validated");
+            }, false);
+        }
+    });
+</script>
+
 </body>
 </html>

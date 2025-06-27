@@ -1,36 +1,38 @@
 package org.example.doctorplus.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
+import java.time.LocalDate;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@Data
 public class PatientDTO {
-    @NotEmpty(message = "Паспорт не может быть пустым")
-    private String passport;
 
-    @NotEmpty(message = "Имя не может быть пустым")
-    @Size(min = 3, max = 30, message = "От 3 до 30 символов")
-    private String name;
+    private Long id;
 
-    @NotEmpty(message = "Фамилия не может быть пустой")
-    @Size(min = 3, max = 30, message = "От 3 до 30 символов")
+    @NotBlank(message = "Фамилия обязательна")
     private String surname;
 
-    // Отчество - может быть пустым
+    @NotBlank(message = "Имя обязательно")
+    private String name;
+
     private String patronymic;
 
-    @NotEmpty(message = "Номер телефона не может быть пустым")
-    @Size(min = 3, max = 10, message = "От 3 до 10 символов")
+    @NotBlank(message = "Паспорт обязателен")
+    @Pattern(regexp = "\\d{10}", message = "Паспорт должен содержать 10 цифр")
+    private String passport;
+
+    @NotBlank(message = "Телефон обязателен")
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Некорректный телефон")
     private String phone;
 
-    // email - может быть пустым
+    @Email(message = "Некорректный email")
     private String email;
 
-    // address - может быть пустым
     private String address;
+
+    // Добавлено поле birthDate
+    @PastOrPresent(message = "Дата рождения не может быть в будущем")
+    private LocalDate birthDate;
 }

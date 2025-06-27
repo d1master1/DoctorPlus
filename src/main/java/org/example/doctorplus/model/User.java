@@ -2,6 +2,7 @@ package org.example.doctorplus.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -16,25 +17,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String username;
+
     private String name;
     private String surname;
     private String password;
-    private String email;
-    private String phone;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
-    private Patient patient;
-
-    public String getFullName() {
-        return name + " " + surname;
-    }
+    private Set<Role> roles = new HashSet<>();
 }

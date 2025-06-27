@@ -1,64 +1,217 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>DoctorPlus — Форма для пациента</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"/>
+    <style>
+        body {
+            padding-top: 56px; /* отступ для header */
+        }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<!-- Шапка -->
 <div th:replace="~{/include/header}"></div>
-<main class="flex-grow-1">
+
+<main class="flex-grow-1 py-4">
     <div class="container mt-5">
-        <h1 th:text="${#strings.isEmpty(patient.id)} ? 'Добавить пациента' : 'Редактировать пациента'"></h1>
-        <form th:action="@{/patient/save}" th:object="${patient}" method="post" novalidate>
-            <input type="hidden" th:field="*{id}" />
+        <div class="row justify-content-center">
+            <div class="col-md-6">
 
-            <div class="mb-3">
-                <label for="surname" class="form-label">Фамилия</label>
-                <input type="text" class="form-control" id="surname" th:field="*{surname}" required />
+                <!-- Заголовок формы -->
+                <h2 class="mb-4 text-center" th:text="${patient.id == null ? 'Добавить пациента' : 'Редактировать пациента'}">
+                    Форма пациента
+                </h2>
+
+                <!-- Сообщение об успешном сохранении -->
+                <div th:if="${param.success}" class="alert alert-success text-center" role="alert">
+                    Пациент успешно сохранён.
+                </div>
+
+                <!-- Сообщение об ошибке -->
+                <div th:if="${param.error}" class="alert alert-danger text-center" role="alert">
+                    Ошибка при сохранении данных.
+                </div>
+
+                <!-- Форма -->
+                <form th:action="@{/patient/save}"
+                      th:object="${patient}"
+                      method="post"
+                      novalidate
+                      class="needs-validation was-validated">
+
+                    <input type="hidden" th:field="*{id}" />
+
+                    <!-- Выбор пользователя -->
+                    <div class="mb-3">
+                        <label for="userSelect" class="form-label">Выберите пользователя:</label>
+                        <select id="userSelect"
+                                class="form-select"
+                                th:field="*{userId}"
+                                required>
+                            <option value="">— Не выбрано —</option>
+                            <option th:each="user : ${users}"
+                                    th:value="${user.id}"
+                                    th:text="${user.username + ' — ' + user.name + ' ' + user.surname}"
+                                    th:selected="${user.id == patient.userId}">
+                            </option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('userId')}"
+                             th:text="${#fields.firstError('userId')}">
+                            Выберите пользователя
+                        </div>
+                    </div>
+
+                    <!-- Имя -->
+                    <div class="mb-3">
+                        <label for="name">Имя</label>
+                        <input type="text"
+                               id="name"
+                               th:field="*{name}"
+                               class="form-control"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}"
+                             th:text="${#fields.firstError('name')}">
+                            Введите имя
+                        </div>
+                    </div>
+
+                    <!-- Фамилия -->
+                    <div class="mb-3">
+                        <label for="surname">Фамилия</label>
+                        <input type="text"
+                               id="surname"
+                               th:field="*{surname}"
+                               class="form-control"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('surname')}"
+                             th:text="${#fields.firstError('surname')}">
+                            Введите фамилию
+                        </div>
+                    </div>
+
+                    <!-- Отчество -->
+                    <div class="mb-3">
+                        <label for="patronymic">Отчество (необязательно)</label>
+                        <input type="text"
+                               id="patronymic"
+                               th:field="*{patronymic}"
+                               class="form-control" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('patronymic')}"
+                             th:text="${#fields.firstError('patronymic')}">
+                            Неверное отчество
+                        </div>
+                    </div>
+
+                    <!-- Дата рождения -->
+                    <div class="mb-3">
+                        <label for="birthDate">Дата рождения</label>
+                        <input type="date"
+                               id="birthDate"
+                               th:field="*{birthDate}"
+                               class="form-control" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('birthDate')}"
+                             th:text="${#fields.firstError('birthDate')}">
+                            Некорректная дата
+                        </div>
+                    </div>
+
+                    <!-- Паспорт -->
+                    <div class="mb-3">
+                        <label for="passport">Паспорт</label>
+                        <input type="text"
+                               id="passport"
+                               th:field="*{passport}"
+                               class="form-control"
+                               pattern="\d{10}"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('passport')}"
+                             th:text="${#fields.firstError('passport')}">
+                            Введите 10 цифр паспорта
+                        </div>
+                    </div>
+
+                    <!-- Телефон -->
+                    <div class="mb-3">
+                        <label for="phone">Телефон</label>
+                        <input type="tel"
+                               id="phone"
+                               th:field="*{phone}"
+                               class="form-control"
+                               pattern="^\\+?[0-9]{10,15}$"
+                               required />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}"
+                             th:text="${#fields.firstError('phone')}">
+                            Введите корректный номер телефона
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email">Email (необязательно)</label>
+                        <input type="email"
+                               id="email"
+                               th:field="*{email}"
+                               class="form-control" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
+                             th:text="${#fields.firstError('email')}">
+                            Введите корректный email
+                        </div>
+                    </div>
+
+                    <!-- Адрес -->
+                    <div class="mb-3">
+                        <label for="address">Адрес (необязательно)</label>
+                        <input type="text"
+                               id="address"
+                               th:field="*{address}"
+                               class="form-control" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}"
+                             th:text="${#fields.firstError('address')}">
+                            Введите адрес
+                        </div>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a th:href="@{/patient}" class="btn btn-secondary ms-2">Отмена</a>
+                    </div>
+                </form>
             </div>
-
-            <div class="mb-3">
-                <label for="name" class="form-label">Имя</label>
-                <input type="text" class="form-control" id="name" th:field="*{name}" required />
-            </div>
-
-            <div class="mb-3">
-                <label for="patronymic" class="form-label">Отчество (необязательно)</label>
-                <input type="text" class="form-control" id="patronymic" th:field="*{patronymic}" />
-            </div>
-
-            <div class="mb-3">
-                <label for="passport" class="form-label">Паспорт</label>
-                <input type="text" class="form-control" id="passport" th:field="*{passport}" required pattern="\d{10}"
-                       title="Введите 10 цифр паспорта" />
-            </div>
-
-            <div class="mb-3">
-                <label for="phone" class="form-label">Телефон</label>
-                <input type="tel" class="form-control" id="phone" th:field="*{phone}" required
-                       pattern="^\+?[0-9\s\-]{7,15}$" title="Введите корректный номер телефона" />
-            </div>
-
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" th:field="*{email}" />
-            </div>
-
-            <div class="mb-3">
-                <label for="address" class="form-label">Адрес</label>
-                <input type="text" class="form-control" id="address" th:field="*{address}" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/patient}" class="btn btn-secondary ms-2">Отмена</a>
-        </form>
+        </div>
     </div>
 </main>
+
+<!-- Подвал -->
+<div th:replace="~{/include/footer}"></div>
+
+<!-- JS валидации формы -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".needs-validation");
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add("was-validated");
+            }, false);
+        }
+    });
+</script>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
 </body>
 </html>

@@ -15,7 +15,7 @@
             <!-- Кнопки "Главная" и "Профиль" -->
             <div class="d-flex align-items-center me-3">
                 <a class="btn btn-outline-primary me-2" href="/" role="button">Главная</a>
-                <a class="btn btn-outline-success me-4" th:href="@{/profile}" role="button" sec:authorize="isAuthenticated()">Профиль</a>
+                <a class="btn btn-outline-success me-4" th:href="@{/profile}" role="button">Профиль</a>
             </div>
 
             <!-- Разделы сайта -->
@@ -45,7 +45,7 @@
                     <a class="nav-link" th:href="@{/login}">Вход</a>
                 </li>
                 <li class="nav-item" sec:authorize="!isAuthenticated()">
-                    <a class="nav-link" th:href="@{/patient/add}">Регистрация</a>
+                    <a class="nav-link" th:href="@{/register}">Регистрация</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <form th:action="@{/logout}" method="post" class="d-inline">

@@ -23,12 +23,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         // Доступ для всех (гости)
                         .requestMatchers(
-                                "/", "/login", "/include/registration/**", "/logout", "/webjars/**", "/css/**", "/js/**", "/images/**",
-                                "/fonts/**", "/header", "/footer", "/about", "/include/about", "/uploads/**", "/img/**"
+                                "/", "/resources/**", "/register", "/login", "/include/registration/**", "/logout", "/webjars/**", "/css/**", "/img/**",
+                                "/js/**", "/images/**", "/fonts/**", "/header", "/footer", "/about", "/profile", "/profile/**", "/include/about", "/uploads/**"
                         ).permitAll()
 
                         // Только для авторизированных пользователей
-                        .requestMatchers("/profile", "/profile/**", "/appointment/appointment_list", "/serving/serving_list")
+                        .requestMatchers( "/appointment/appointment_list", "/serving/serving_list")
                         .authenticated()
 
                         // Только доктора и админы
@@ -54,9 +54,6 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
-                )
-                .exceptionHandling(exceptions -> exceptions
-                        .accessDeniedHandler((request, response, ex) -> response.sendRedirect("/access-denied"))
                 );
 
         return http.build();
