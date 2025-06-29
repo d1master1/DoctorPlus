@@ -10,10 +10,8 @@ import org.example.doctorplus.repo.ServingRepo;
 import org.example.doctorplus.service.AppointmentService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +21,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientRepo patientRepository;
     private final DoctorRepo doctorRepository;
     private final ServingRepo servingRepository;
-    @Setter
-    private AppointmentServiceImpl patientService;
 
     @Override
     public List<Appointment> getAllAppointments(Sort sort) {
@@ -68,49 +64,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<Appointment> findByPatient(Patient patient) {
-        return appointmentRepository.findByPatient(patient);
-    }
-
-    @Override
-    public List<Appointment> getAllAppointments(String sortField, String sortDir) {
-        Sort.Direction direction = (sortDir == null || sortDir.equalsIgnoreCase("asc"))
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-
-        Sort sortBy = (sortField == null || sortField.isBlank())
-                ? Sort.unsorted()
-                : Sort.by(direction, sortField);
-
-        return appointmentRepository.findAll(sortBy);
-    }
-
-    @Override
     public boolean existsByServing(Serving serving) {
-        // Проверяем, есть ли приём с такой услугой
         return appointmentRepository.existsByServing(serving);
-    }
-
-    @Override
-    public Optional<Patient> findPatientById(Long id) {
-        return appointmentRepository.findById(id)
-                .map(Appointment::getPatient);
     }
 
     @Override
     public Optional<Appointment> findById(Long id) {
         return appointmentRepository.findById(id);
-    }
-
-    @Override
-    public List<Appointment> findAllByUser(User user) {
-        return patientRepository.findById(id);
-    }
-
-    @Override
-    public List<Appointment> findByPatientId(Long patientId) {
-        Appointment patient = patientService.findById(patientId).orElse(null);
-        if (patient == null) return Collections.emptyList();
-        return appointmentRepository.findByPatient(patient.getPatient());
     }
 }

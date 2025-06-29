@@ -40,32 +40,19 @@
                 </div>
 
                 <!-- Форма -->
-                <form th:action="@{/patient/save}"
-                      th:object="${patient}"
-                      method="post"
-                      novalidate
-                      class="needs-validation was-validated">
+                <form th:action="@{/patient/save}" method="post" th:object="${patientDTO}">
 
                     <input type="hidden" th:field="*{id}" />
 
                     <!-- Выбор пользователя -->
                     <div class="mb-3">
-                        <label for="userSelect" class="form-label">Выберите пользователя:</label>
-                        <select id="userSelect"
-                                class="form-select"
-                                th:field="*{userId}"
-                                required>
-                            <option value="">— Не выбрано —</option>
+                        <label>Пользователь:</label>
+                        <select th:field="*{user}" class="form-select" required>
+                            <option value="">Выберите пользователя</option>
                             <option th:each="user : ${users}"
-                                    th:value="${user.id}"
-                                    th:text="${user.username + ' — ' + user.name + ' ' + user.surname}"
-                                    th:selected="${user.id == patient.userId}">
-                            </option>
+                                    th:value="${user.username}"
+                                    th:text="${user.username}">user</option>
                         </select>
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('userId')}"
-                             th:text="${#fields.firstError('userId')}">
-                            Выберите пользователя
-                        </div>
                     </div>
 
                     <!-- Имя -->
@@ -188,9 +175,6 @@
         </div>
     </div>
 </main>
-
-<!-- Подвал -->
-<div th:replace="~{/include/footer}"></div>
 
 <!-- JS валидации формы -->
 <script>

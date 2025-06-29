@@ -14,11 +14,6 @@ public interface AppointmentService {
     void deleteAppointment(Long id);
     List<Appointment> findAll();
     int deleteAllAppointments();
-    List<Appointment> findByPatient(Patient patient);
-    List<Appointment> getAllAppointments(String sortField, String sortDir);
-    List<Appointment> findAllByUser(User user);
     boolean existsByServing(Serving serving);
     Optional<Appointment> findById(Long id);
-    Optional<Patient> findPatientById(Long id);
-    List<Appointment> findByPatientId(Long patientId);
 }

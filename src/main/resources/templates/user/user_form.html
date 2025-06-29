@@ -1,127 +1,54 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <title>DoctorPlus — Редактирование ролей</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap @5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous"/>
-
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-        }
-
-        .sidebar {
-            width: 180px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #ddd;
-            height: 100vh;
-            position: fixed;
-            padding-top: 1rem;
-        }
-
-        .header {
-            height: 56px;
-            padding: 0 1rem;
-            background-color: #e9ecef;
-            border-bottom: 1px solid #ddd;
-            margin-left: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 1rem;
-        }
-
-        .content {
-            margin-left: 180px;
-            margin-top: 56px;
-            padding: 1rem;
-        }
-    </style>
+    <title>Редактировать пользователя</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap @5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 
-<!-- Боковое меню -->
-<div th:replace="~{/include/sidebar :: sidebar}"></div>
+<div class="container mt-5">
+    <h2>Редактировать пользователя</h2>
 
-<header class="header d-flex align-items-center justify-content-between">
-    <div>DoctorPlus — Редактирование ролей</div>
-</header>
+    <form th:action="@{/user/update}" method="post" th:object="${userDTO}">
+        <input type="hidden" th:field="*{id}" />
 
-<main class="content">
-    <div class="container mt-3">
-        <h2 class="mb-4">Редактирование ролей пользователя</h2>
+        <!-- Логин -->
+        <div class="mb-3">
+            <label>Логин:</label>
+            <input type="text" th:field="*{username}" class="form-control" disabled />
+        </div>
 
-        <!-- Форма -->
-        <form th:action="@{/user/roles/save}"
-              th:object="${userDTO}"
-              method="post"
-              novalidate
-              class="needs-validation was-validated">
-
-            <!-- ID пользователя -->
-            <input type="hidden" th:field="*{id}" />
-
-            <!-- Выбор ролей -->
-            <div class="mb-3">
-                <label class="form-label">Роли:</label>
-
-                <div th:each="role : ${allRoles}">
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               th:field="*{roles}"
-                               th:value="${role.name()}"
-                               th:id="'role_' + ${role.name()}"
-                               type="checkbox"/>
-
-                        <label class="form-check-label" th:for="'role_' + ${role.name()}">
-                            <span th:text="${role.displayName}">USER</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="invalid-feedback" th:if="${#fields.hasErrors('roles')}"
-                     th:text="#{Пожалуйста, выберите хотя бы одну роль}">
-                    Выберите хотя бы одну роль
-                </div>
+        <!-- Роли -->
+        <div class="mb-3 form-check">
+            <label>Роли:</label><br/>
+            <div th:each="role : ${T(org.example.doctorplus.model.Role).values()}">
+                <input type="checkbox"
+                       th:field="*{roles}"
+                       th:value="${role.name()}"
+                       class="form-check-input"/>
+                <label class="form-check-label" th:text="${role}">Role</label><br/>
             </div>
+        </div>
 
-            <!-- Кнопка сохранения -->
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/user}" class="btn btn-secondary ms-2">Отмена</a>
-        </form>
-    </div>
-</main>
+        <!-- Пароль -->
+        <div class="mb-3">
+            <label>Пароль:</label>
+            <input type="password" th:field="*{password}" class="form-control" placeholder="Оставьте пустым, если не хотите менять" />
+        </div>
 
-<!-- Подвал -->
-<div th:replace="~{/include/footer}"></div>
+        <!-- Подтверждение пароля -->
+        <div class="mb-3">
+            <label>Подтвердите пароль:</label>
+            <input type="password" th:field="*{confirmPassword}" class="form-control" />
+        </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap @5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+        <!-- Кнопки -->
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a th:href="@{/user}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
 
-<!-- Валидация формы -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector(".needs-validation");
-        if (form) {
-            form.addEventListener("submit", function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add("was-validated");
-            }, false);
-        }
-    });
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap @5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

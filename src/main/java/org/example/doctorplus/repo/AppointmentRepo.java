@@ -12,9 +12,4 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
     List<Appointment> findAll(Sort sort);
     boolean existsByDoctor(Doctor doctor);
     boolean existsByServing(Serving serving);
-    Optional<Appointment> findById(Long id);
-    List<Appointment> findByUser(User user);
-    List<Appointment> findByPatient(User user);
-    List<Appointment> findByPatient(Patient patient);
-    List<Appointment> findByDoctor(Doctor doctor);
 }

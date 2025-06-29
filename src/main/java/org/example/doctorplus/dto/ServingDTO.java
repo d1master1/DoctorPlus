@@ -1,22 +1,30 @@
 package org.example.doctorplus.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.*;
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServingDTO {
-    @NotEmpty(message = "Название не может быть пустым")
-    @Size(min = 3, max = 50, message = "От 3 до 50 символов")
+
+    private Long id;
+
+    @NotBlank(message = "Название услуги обязательно")
     private String name;
 
-    @NotEmpty(message = "Описание не может быть пустым")
+    @Size(max = 500, message = "Описание не должно превышать 500 символов")
     private String description;
 
-    @NotEmpty(message = "Стоимость не может быть пустой")
-    private double cost;
+    @NotNull(message = "Стоимость обязательна")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Стоимость должна быть больше нуля")
+    private BigDecimal cost;
+
+    private Long patientId; // ID пациента (необязательный)
+    private Long userId;    // ID пользователя (обязательный)
+
+    // Если вы хотите передавать данные пользователя
+    private String username;
 }

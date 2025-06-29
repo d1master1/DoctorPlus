@@ -19,7 +19,6 @@ import java.util.Set;
 public class RegistrationController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -32,15 +31,6 @@ public class RegistrationController {
                            BindingResult result,
                            RedirectAttributes redirectAttrs) {
 
-        // Валидация паролей
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            result.rejectValue("confirmPassword", "", "Пароли не совпадают");
-        }
-
-        if (userService.existsByUsername(dto.getUsername())) {
-            result.rejectValue("username", "", "Логин уже занят");
-        }
-
         if (result.hasErrors()) {
             redirectAttrs.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
             redirectAttrs.addFlashAttribute("userDTO", dto);
@@ -48,19 +38,12 @@ public class RegistrationController {
         }
 
         try {
-            User user = new User();
-            user.setUsername(dto.getUsername());
-            user.setName(dto.getName());
-            user.setSurname(dto.getSurname());
-            user.setPassword(passwordEncoder.encode(dto.getPassword()));
-            user.setRoles(Set.of(Role.USER));
-
-            userService.save(user);
-
+            userService.save(dto);
             return "redirect:/login?success";
-
         } catch (Exception e) {
-            redirectAttrs.addFlashAttribute("error", "Ошибка регистрации: " + e.getMessage());
+            result.reject("", "Ошибка регистрации: " + e.getMessage());
+            redirectAttrs.addFlashAttribute("userDTO", dto);
+            redirectAttrs.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
             return "redirect:/register";
         }
     }

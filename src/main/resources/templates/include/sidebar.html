@@ -1,3 +1,4 @@
+<!-- sidebar.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -7,10 +8,7 @@
 <body>
 
 <!-- Боковое меню -->
-<div th:fragment="sidebar" class="sidebar d-flex flex-column bg-light vh-100"
-     xmlns:th="http://www.thymeleaf.org"
-     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
+<div th:fragment="sidebar" class="sidebar d-flex flex-column bg-light vh-100 p-3">
     <!-- Логотип/название клиники -->
     <div class="px-3 mb-3 d-flex align-items-center border-bottom py-2">
         <i class="bi bi-heart-pulse me-2 fs-5"></i>
@@ -25,7 +23,7 @@
         </a>
 
         <!-- Профиль -->
-        <a class="btn btn-outline-secondary mb-2 text-start" th:href="@{/profile}">
+        <a class="btn btn-outline-secondary mb-2 text-start" th:href="@{/profile}" sec:authorize="isAuthenticated()">
             <i class="bi bi-person-circle me-2"></i>Профиль
         </a>
 
@@ -65,12 +63,12 @@
         </a>
 
         <!-- Выход -->
-        <a href="#" class="btn btn-outline-secondary text-start"
+        <a href="#" class="btn btn-outline-danger text-start mt-auto"
            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="bi bi-box-arrow-right me-2"></i>Выход
         </a>
         <form id="logout-form" th:action="@{/logout}" method="post" style="display:none;">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="_csrf" th:value="${_csrf?.token}" />
         </form>
     </nav>
 </div>

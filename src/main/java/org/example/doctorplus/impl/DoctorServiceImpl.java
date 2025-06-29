@@ -59,7 +59,6 @@ public class DoctorServiceImpl implements DoctorService {
         return undeleted;
     }
 
-    // ✅ Методы для сортировки — нужно реализовать
     @Override
     public List<Doctor> findAllOrderByNameAsc() {
         return doctorRepo.findAllByOrderByNameAsc();

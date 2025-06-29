@@ -14,12 +14,6 @@ import java.util.Optional;
 
 @Repository
 public interface PatientRepo extends JpaRepository<Patient, Long> {
-    List<Patient> findAllByOrderBySurnameAsc();
-    List<Patient> findAllByOrderBySurnameDesc();
-    List<Patient> findAllByOrderByNameAsc();
-    List<Patient> findAllByOrderByNameDesc();
-    boolean existsById(Long id);
     List<Patient> findAll(Sort sort);
-    Optional<Patient> findByUser(User user);
     List<Appointment> findById(SingularAttribute<AbstractPersistable, Serializable> id);
 }
