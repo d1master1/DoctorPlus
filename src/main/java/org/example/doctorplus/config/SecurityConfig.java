@@ -52,6 +52,6 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.disable());
 
-        return http.build(); // Вызываем build() только один раз!
+        return http.build();
     }
 }

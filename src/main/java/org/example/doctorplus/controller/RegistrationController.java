@@ -19,7 +19,7 @@ import java.util.Set;
 public class RegistrationController {
 
     private final UserService userService;
-    private final PasswordEncoder encoder;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -32,18 +32,19 @@ public class RegistrationController {
                            BindingResult result,
                            RedirectAttributes redirectAttrs) {
 
-        if (result.hasErrors()) {
-            return "include/register";
-        }
-
+        // Валидация паролей
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             result.rejectValue("confirmPassword", "", "Пароли не совпадают");
-            return "include/register";
         }
 
         if (userService.existsByUsername(dto.getUsername())) {
-            result.rejectValue("username", "", "Этот логин уже занят");
-            return "include/register";
+            result.rejectValue("username", "", "Логин уже занят");
+        }
+
+        if (result.hasErrors()) {
+            redirectAttrs.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+            redirectAttrs.addFlashAttribute("userDTO", dto);
+            return "redirect:/register";
         }
 
         try {
@@ -51,7 +52,7 @@ public class RegistrationController {
             user.setUsername(dto.getUsername());
             user.setName(dto.getName());
             user.setSurname(dto.getSurname());
-            user.setPassword(encoder.encode(dto.getPassword()));
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
             user.setRoles(Set.of(Role.USER));
 
             userService.save(user);
@@ -59,8 +60,8 @@ public class RegistrationController {
             return "redirect:/login?success";
 
         } catch (Exception e) {
-            result.reject("", "Ошибка регистрации: " + e.getMessage());
-            return "include/register";
+            redirectAttrs.addFlashAttribute("error", "Ошибка регистрации: " + e.getMessage());
+            return "redirect:/register";
         }
     }
 }

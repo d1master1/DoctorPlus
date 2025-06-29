@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -105,24 +106,45 @@ public class UserController {
         return "redirect:/user";
     }
 
-    // --- Обновление ролей пользователя --- //
     @PostMapping("/update")
-    public String updateUser(@ModelAttribute("user") UserDTO dto,
-                             @RequestParam(value = "roles", required = false) List<String> roleNames) {
+    public String updateUser(
+            @Valid @ModelAttribute("user") UserDTO userDTO,
+            @RequestParam(value = "roles", required = false) List<String> roleNames,
+            BindingResult result,
+            RedirectAttributes redirectAttrs) {
+
+        // 1. Проверяем валидацию основных полей
+        if (result.hasErrors()) {
+            redirectAttrs.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+            redirectAttrs.addFlashAttribute("user", userDTO);
+            return "redirect:/user/edit/" + userDTO.getUsername();
+        }
+
+        // 2. Преобразуем строки в Enum Role
         Set<Role> roles = new HashSet<>();
-        if (roleNames != null) {
+        if (roleNames != null && !roleNames.isEmpty()) {
             for (String roleName : roleNames) {
                 try {
                     roles.add(Role.valueOf(roleName));
-                } catch (IllegalArgumentException e) {
-                    // игнорируем неверные роли
+                } catch (IllegalArgumentException ex) {
+                    result.rejectValue("roles", "", "Недопустимая роль: " + roleName);
                 }
             }
         }
 
-        // сохраняем роли в DTO
-        dto.setRoles(roles);
-        userService.update(dto);
+        // 3. Устанавливаем роли в DTO
+        userDTO.setRoles(roles);
+
+        try {
+            // 4. Обновляем пользователя
+            userService.update(userDTO);
+            redirectAttrs.addFlashAttribute("successMessage", "Данные пользователя успешно обновлены");
+        } catch (Exception e) {
+            result.reject("", "Ошибка при обновлении пользователя: " + e.getMessage());
+            redirectAttrs.addFlashAttribute("user", userDTO);
+            redirectAttrs.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+            return "redirect:/user/edit/" + userDTO.getUsername();
+        }
 
         return "redirect:/user";
     }

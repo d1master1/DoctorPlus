@@ -3,6 +3,7 @@ package org.example.doctorplus.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.doctorplus.dto.UserDTO;
+import org.example.doctorplus.model.Role;
 import org.example.doctorplus.model.User;
 import org.example.doctorplus.repo.UserRepo;
 import org.example.doctorplus.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,20 +26,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void update(UserDTO dto) {
-        Optional<User> optionalUser = userRepo.findByUsername(dto.getUsername());
-        if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("Пользователь не найден");
-        }
+        // 1. Найти пользователя по логину
+        User user = userRepo.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
-        User user = optionalUser.get();
+        // 2. Обновить персональные данные
         user.setName(dto.getName());
         user.setSurname(dto.getSurname());
-        user.setRoles(dto.getRoles());
 
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty() && dto.isPasswordConfirmed()) {
+        // 3. Обновить пароль, если он указан и подтверждён
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            if (dto.isPasswordConfirmed()) {
+                throw new IllegalArgumentException("Пароли не совпадают");
+            }
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
+        // 4. Сохранить изменения
         userRepo.save(user);
     }
 
@@ -77,29 +82,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(UserDTO dto) {
-        if (!dto.isPasswordConfirmed()) {
-            throw new IllegalArgumentException("Пароли не совпадают");
-        }
-
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setName(dto.getName());
-        user.setSurname(dto.getSurname());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRoles(dto.getRoles());
-
-        userRepo.save(user);
-    }
-
-    @Override
     public boolean isUsernameAvailable(String username) {
         return !userRepo.existsByUsername(username);
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        return userRepo.existsByUsername(username);
+    public Optional<User> findByUsername(String username) {
+        return userRepo.findByUsername(username);
     }
 
     @Override
@@ -108,7 +97,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        return userRepo.findByUsername(username);
+    public void save(UserDTO dto) {
+        if (!dto.isPasswordConfirmed()) {
+            throw new IllegalArgumentException("Пароли не совпадают");
+        }
+
+        if (userRepo.existsByUsername(dto.getUsername())) {
+            throw new IllegalArgumentException("Логин уже занят");
+        }
+
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRoles(Set.of(Role.USER));
+
+        userRepo.save(user);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepo.existsByUsername(username);
     }
 }

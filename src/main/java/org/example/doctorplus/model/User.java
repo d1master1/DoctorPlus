@@ -5,12 +5,12 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "users")
 public class User {
 
     @Id
@@ -25,7 +25,6 @@ public class User {
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 }
