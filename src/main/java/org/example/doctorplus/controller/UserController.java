@@ -132,9 +132,6 @@ public class UserController {
             }
         }
 
-        // 3. Устанавливаем роли в DTO
-        userDTO.setRoles(roles);
-
         try {
             // 4. Обновляем пользователя
             userService.update(userDTO);
