@@ -2,6 +2,7 @@ package org.example.doctorplus.controller;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.example.doctorplus.dto.ServingDTO;
 import org.example.doctorplus.model.Appointment;
 import org.example.doctorplus.model.Serving;
 import org.example.doctorplus.model.User;
@@ -31,7 +32,7 @@ public class ProfileController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        List<Serving> servings = servingService.findByUsername(username);
+        List<ServingDTO> servings = servingService.findByUsername(username);
         model.addAttribute("servings", servings);
 
         return "include/profile";

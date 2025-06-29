@@ -28,7 +28,7 @@ public class ServingController {
 
     @GetMapping("/list")
     public String listServings(Model model) {
-        List<Serving> servings = servingService.findAll();
+        List<Serving> servings = servingService.findAll(); // вызов метода
         model.addAttribute("servings", servings);
         return "include/serving_list";
     }
@@ -37,14 +37,18 @@ public class ServingController {
     public String showForm(@RequestParam(required = false) Long id, Model model) {
         ServingDTO dto = new ServingDTO();
 
-        if (id != null && servingService.findById(id) != null) {
-            Serving serving = servingService.findById(id);
+        if (id != null && servingService.findById(id).isPresent()) {
+            Serving serving = servingService.findById(id).get();
             dto.setId(serving.getId());
             dto.setName(serving.getName());
             dto.setDescription(serving.getDescription());
             dto.setCost(serving.getCost());
             dto.setUserId(serving.getUser().getId());
             dto.setUsername(serving.getUser().getUsername());
+
+            if (serving.getPatient() != null) {
+                dto.setPatientId(serving.getPatient().getId());
+            }
         }
 
         model.addAttribute("servingDTO", dto);
@@ -77,10 +81,12 @@ public class ServingController {
         serving.setUser(user);
 
         // Установка пациента (опционально)
-        if (dto.getPatientId() != null) {
+        if (dto.getPatientId() != null && !dto.getPatientId().equals(0L)) {
             Patient patient = patientService.findById(dto.getPatientId())
                     .orElseThrow(() -> new IllegalArgumentException("Пациент не найден"));
             serving.setPatient(patient);
+        } else {
+            serving.setPatient(null); // если пациент не выбран — очистить
         }
 
         servingService.save(serving);
@@ -89,24 +95,7 @@ public class ServingController {
 
     @GetMapping("/edit/{id}")
     public String editServing(@PathVariable Long id, Model model) {
-        Serving serving = servingService.findById(id);
-        ServingDTO dto = new ServingDTO();
-        dto.setId(serving.getId());
-        dto.setName(serving.getName());
-        dto.setDescription(serving.getDescription());
-        dto.setCost(serving.getCost());
-        dto.setUserId(serving.getUser().getId());
-        dto.setUsername(serving.getUser().getUsername());
-
-        if (serving.getPatient() != null) {
-            dto.setPatientId(serving.getPatient().getId());
-        }
-
-        model.addAttribute("servingDTO", dto);
-        model.addAttribute("users", userService.findAll());
-        model.addAttribute("patients", patientService.findAll());
-
-        return "include/serving_form";
+        return showForm(id, model);
     }
 
     @GetMapping("/delete/{id}")

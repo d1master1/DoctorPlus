@@ -22,17 +22,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(
-                                "/", "/resources/**", "/register", "/login", "/include/registration/**", "/logout",
-                                "/webjars/**", "/css/**", "/img/**", "/js/**", "/images/**", "/fonts/**",
-                                "/header", "/footer", "/about", "/profile", "/profile/**", "/include/about", "/uploads/**"
+                                "/", "/resources/**", "/register", "/login", "/logout",
+                                "/webjars/**", "/css/**", "/img/**", "/js/**", "/about", "/profile"
                         ).permitAll()
-                        .requestMatchers("/appointment/appointment_list", "/serving/serving_list")
-                        .authenticated()
-                        .requestMatchers("/serving/serving_form", "/appointment/appointment_form",
-                                "/patient/patient_list", "/patient/patient_form")
+                        .requestMatchers("/serving/list", "/serving/form").authenticated()
+                        .requestMatchers("/serving/form", "/appointment/form")
                         .hasAnyRole("DOCTOR", "ADMIN")
-                        .requestMatchers("/doctor/doctor_form", "/doctor/doctor_list",
-                                "/user/user_list", "/user/user_form")
+                        .requestMatchers("/doctor/**", "/user/**")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

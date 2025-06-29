@@ -3,36 +3,45 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Услуги</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap @5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
 </head>
 <body>
 
-<h2>Список услуг</h2>
+<div class="container mt-5">
+    <h2>Список услуг</h2>
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Название</th>
-        <th>Описание</th>
-        <th>Стоимость</th>
-        <th>Пациент</th>
-        <th>Пользователь</th>
-        <th>Действия</th>
-    </tr>
-    <tr th:each="serving : ${servings}">
-        <td th:text="${serving.id}">ID</td>
-        <td th:text="${serving.name}">Название</td>
-        <td th:text="${serving.description}">Описание</td>
-        <td th:text="${serving.cost}">Стоимость</td>
-        <td th:text="${serving.patient?.name + ' ' + serving.patient?.surname}">Пациент</td>
-        <td th:text="${serving.user?.username}">Пользователь</td>
-        <td>
-            <a th:href="@{/serving/edit/{id}(id=${serving.id})}">Редактировать</a> |
-            <a th:href="@{/serving/delete/{id}(id=${serving.id})}">Удалить</a>
-        </td>
-    </tr>
-</table>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Стоимость</th>
+            <th>Пациент</th>
+            <th>Пользователь</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="serving : ${servings}">
+            <td th:text="${serving.id}">ID</td>
+            <td th:text="${serving.name}">Название</td>
+            <td th:text="${serving.description}">Описание</td>
+            <td th:text="${serving.cost}">Стоимость</td>
+            <td th:text="${serving.patient?.name + ' ' + serving.patient?.surname}">Пациент</td>
+            <td th:text="${serving.user?.username}">Пользователь</td>
+            <td>
+                <a th:href="@{/serving/edit/{id}(id=${serving.id})}" class="btn btn-sm btn-warning">Редактировать</a>
+                <a th:href="@{/serving/delete/{id}(id=${serving.id})}" class="btn btn-sm btn-danger">Удалить</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
-<a href="/serving/form">Добавить услугу</a>
+    <a th:href="@{/serving/form}" class="btn btn-success">Добавить услугу</a>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap @5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
