@@ -40,6 +40,8 @@ public class UserDTO {
 
     private Set<Role> roles = new HashSet<>();
 
+    public <R> UserDTO(Long id, String username, String name, String surname, R collect) {}
+
     // Статический метод преобразования из сущности User в DTO
     public static UserDTO fromEntity(User user) {
         UserDTO dto = new UserDTO();

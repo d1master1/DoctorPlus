@@ -25,6 +25,31 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Override
+    public User update(UserDTO userDTO) {
+        Optional<User> optionalUser = userRepo.findById(userDTO.getId());
+
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("Пользователь с ID " + userDTO.getId() + " не найден");
+        }
+
+        User user = optionalUser.get();
+
+        // Обновляем поля
+        user.setUsername(userDTO.getUsername());
+        user.setName(userDTO.getName());
+        user.setSurname(userDTO.getSurname());
+
+        // Обновляем роли
+        Set<Role> roles = new HashSet<>();
+        for (Role role : userDTO.getRoles()) {
+            roles.add(Role.valueOf(role.toString()));
+        }
+        user.setRoles(roles);
+
+        return userRepo.save(user);
+    }
+
+    @Override
     public User save(UserDTO userDTO) {
         if (!isUsernameAvailable(userDTO.getUsername())) {
             throw new IllegalArgumentException("Пользователь с таким именем уже существует");

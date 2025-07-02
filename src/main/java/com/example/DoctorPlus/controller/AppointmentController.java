@@ -55,7 +55,7 @@ public class AppointmentController {
             }
         }
 
-        List<Appointment> appointments = appointmentService.getAllAppointments(sort);
+        List<Appointment> appointments = appointmentService.getAllAppointments();
 
         model.addAttribute("appointments", appointments);
         model.addAttribute("sortField", sortField);
@@ -91,7 +91,6 @@ public class AppointmentController {
             Map<String, Object> map = new HashMap<>();
             map.put("id", r.getId());
             map.put("cost", r.getCost());
-            /*map.put("ownerName", r.getOwner() != null ? r.getOwner().getFullName() : "—");*/
             return map;
         }).collect(Collectors.toList());
 

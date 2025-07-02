@@ -5,12 +5,13 @@ import com.example.DoctorPlus.model.User;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DoctorService {
     List<Doctor> getAllDoctorsSortedBy(String sortBy);
     List<Doctor> getAllDoctorSortedBy(String sortBy);
     Doctor getDoctorById(Long id);
-    void saveDoctor(Doctor doctor);
+    Doctor saveDoctor(Doctor doctor);
     void deleteDoctor(Long id);
     void deleteAllDoctors();
     List<Doctor> getAllDoctors();
@@ -20,4 +21,6 @@ public interface DoctorService {
     Doctor getDoctorByUserId(Long userId);
     List<Doctor> getAllDoctorsWithUsers();
     List<Doctor> deleteAllExceptWithAppointments();
+
+    Optional<Doctor> getDoctorByIdOptional(Long id);
 }

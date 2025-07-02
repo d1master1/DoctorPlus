@@ -26,9 +26,4 @@ public class PatientDTO {
     private String email;
     // license - может быть пустым
     private String address;
-
-    /*// ownerType - может быть пустым
-    private String ownerType;
-    @NotEmpty(message = "Паспорт не может быть пустым")
-    private String passport;*/
 }

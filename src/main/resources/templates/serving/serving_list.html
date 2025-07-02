@@ -115,14 +115,6 @@
                     <a class="dropdown-item" th:href="@{/serving(sortField='region', sortDir='desc')}"
                        th:classappend="${sortField == 'region' and sortDir == 'desc'} ? ' active' : ''">Название ↓</a>
                 </li>
-                <!--<li>
-                    <a class="dropdown-item" th:href="@{/serving(sortField='street', sortDir='asc')}"
-                       th:classappend="${sortField == 'street' and sortDir == 'asc'} ? ' active' : ''">Улица ↑</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" th:href="@{/serving(sortField='street', sortDir='desc')}"
-                       th:classappend="${sortField == 'street' and sortDir == 'desc'} ? ' active' : ''">Улица ↓</a>
-                </li>-->
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item" th:href="@{/serving}"

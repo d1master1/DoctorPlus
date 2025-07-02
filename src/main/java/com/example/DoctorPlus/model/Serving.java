@@ -24,17 +24,6 @@ public class Serving {
     private String description;
     private double cost;
 
-    /*private String street;
-    private int rooms;
-    private int floors;
-    private double square;
-    private String repair;
-    private boolean elevator;
-    private boolean playground;
-    private boolean trashChute;
-    private boolean parking;
-    private boolean balcony;*/
-
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -50,10 +39,6 @@ public class Serving {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
-
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private User owner;*/
     
     @Transient
     public String getFormattedCost() {

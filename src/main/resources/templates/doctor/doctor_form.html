@@ -9,81 +9,93 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<!-- Подключение шапки -->
-<div th:replace="~{/include/header}"></div>
+<main class="flex-grow-1 d-flex align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm border-0 rounded-3 p-4">
+                    <h1 class="text-center mb-4" th:text="${doctor.id == null ? 'Добавить доктора' : 'Редактировать доктора'}">
+                        Форма доктора
+                    </h1>
 
-<main class="flex-grow-1">
-    <div class="container mt-5">
-        <h1 th:text="${doctor.id == null ? 'Добавить доктора' : 'Редактировать доктора'}">Форма доктора</h1>
+                    <form th:action="@{/doctor/save}" th:object="${doctor}" method="post" novalidate>
+                        <input type="hidden" th:field="*{id}" />
 
-        <form th:action="@{/doctor/save}" th:object="${doctor}" method="post" novalidate>
-            <input type="hidden" th:field="*{id}" />
+                        <!-- Выбор пользователя -->
+                        <div class="mb-3">
+                            <label for="userSelect" class="form-label">Выберите доктора:</label>
+                            <select class="form-select w-100" id="userSelect" th:field="*{user.id}">
+                                <option value="">— Не выбрано —</option>
+                                <option th:each="user : ${users}"
+                                        th:value="${user.id}"
+                                        th:selected="${doctor.user != null and user.id == doctor.user.id}"
+                                        th:data-name="${user.name}"
+                                        th:data-surname="${user.surname}"
+                                        th:text="|${user.username} (${user.name} ${user.surname})|">
+                                </option>
+                            </select>
+                        </div>
 
-            <!-- Выбор пользователя -->
-            <div class="mb-4">
-                <label for="userSelect" class="form-label">Выберите доктора:</label>
-                <select class="form-select" id="userSelect" th:field="*{user.id}">
-                    <option value="">— Не выбрано —</option>
-                    <option th:each="user : ${users}"
-                            th:value="${user.id}"
-                            th:selected="${doctor.user != null and user.id == doctor.user.id}"
-                            th:data-name="${user.name}"
-                            th:data-surname="${user.surname}"
-                            th:text="|${user.username} (${user.name} ${user.surname})|">
-                    </option>
-                </select>
+                        <!-- Имя -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Имя:</label>
+                            <input type="text" class="form-control w-100" id="name" th:field="*{name}" required />
+                        </div>
+
+                        <!-- Фамилия -->
+                        <div class="mb-3">
+                            <label for="surname" class="form-label">Фамилия:</label>
+                            <input type="text" class="form-control w-100" id="surname" th:field="*{surname}" required />
+                        </div>
+
+                        <!-- Отчество -->
+                        <div class="mb-3">
+                            <label for="patronymic" class="form-label">Отчество:</label>
+                            <input type="text" class="form-control w-100" id="patronymic" th:field="*{patronymic}" />
+                        </div>
+
+                        <!-- Специализация -->
+                        <div class="mb-3">
+                            <label for="speciality" class="form-label">Специализация:</label>
+                            <select th:field="*{speciality}" id="speciality" class="form-select w-100" required>
+                                <option value="Директор">Директор</option>
+                                <option value="Главный врач">Главный врач</option>
+                                <option value="Исполнительный директор">Исполнительный директор</option>
+                                <option value="Терапевт">Терапевт</option>
+                                <option value="Гинеколог">Гинеколог</option>
+                                <option value="Оториноларинголог ">Оториноларинголог</option>
+                                <option value="Психотерапевт">Психотерапевт</option>
+                                <option value="Дерматолог">Дерматолог</option>
+                                <option value="Офтальмолог">Офтальмолог</option>
+                                <option value="Кардиолог">Кардиолог</option>
+                                <option value="Эндокринолог">Эндокринолог</option>
+                                <option value="Уролог">Уролог</option>
+                            </select>
+                            <div class="invalid-feedback">Выберите пожалуйста специализацию.</div>
+                        </div>
+
+                        <!-- Расписание -->
+                        <div class="mb-3">
+                            <label for="schedule" class="form-label">Расписание работы:</label>
+                            <input type="text" class="form-control w-100" id="schedule" th:field="*{schedule}" required />
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a th:href="@{/doctor}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+
+                    <!-- Блок ошибок валидации -->
+                    <th:block th:if="${validationErrors != null and #lists.isNotEmpty(validationErrors)}">
+                        <ul class="alert alert-danger mt-3">
+                            <li th:each="error : ${validationErrors}" th:text="${error}"></li>
+                        </ul>
+                    </th:block>
+                </div>
             </div>
-
-            <!-- Остальные поля -->
-            <div class="mb-3">
-                <label for="name" class="form-label">Имя:</label>
-                <input type="text" class="form-control" id="name" th:field="*{name}" required />
-            </div>
-
-            <div class="mb-3">
-                <label for="surname" class="form-label">Фамилия:</label>
-                <input type="text" class="form-control" id="surname" th:field="*{surname}" required />
-            </div>
-
-            <div class="mb-3">
-                <label for="patronymic" class="form-label">Отчество:</label>
-                <input type="text" class="form-control" id="patronymic" th:field="*{patronymic}" />
-            </div>
-
-            <!-- Специализация -->
-            <div class="mb-3">
-                <label for="speciality" class="form-label">Специализация:</label>
-                <select th:field="*{speciality}" id="speciality" class="form-control" required>
-                    <option value="Разработчик">Разработчик</option>
-                    <option value="Директор">Директор</option>
-                    <option value="Заместитель директора">Заместитель директора</option>
-                    <option value="Руководитель отдела">Руководитель отдела</option>
-                    <option value="Бухгалтер">Бухгалтер</option>
-                    <option value="Секретарь">Секретарь</option>
-                </select>
-                <div class="invalid-feedback">Выберите пожалуйста специализацию.</div>
-            </div>
-
-            <div class="mb-3">
-                <label for="schedule" class="form-label">Расписание работы:</label>
-                <input type="text" class="form-control" id="schedule" th:field="*{schedule}" required />
-            </div>
-
-            <!--<div class="mb-3">
-                <label for="phone" class="form-label">Телефон:</label>
-                <input type="text" class="form-control" id="phone" th:field="*{phone}" />
-            </div>-->
-
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/doctor}" class="btn btn-secondary">Назад к списку</a>
-        </form>
-
-        <!-- Блок ошибок валидации -->
-        <th:block th:if="${validationErrors != null and #lists.isNotEmpty(validationErrors)}">
-            <ul class="alert alert-danger mt-3">
-                <li th:each="error : ${validationErrors}" th:text="${error}"></li>
-            </ul>
-        </th:block>
+        </div>
     </div>
 </main>
 
@@ -107,9 +119,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
-<!-- Подключение подвала -->
-<div th:replace="~{/include/footer}"></div>
 
 </body>
 </html>

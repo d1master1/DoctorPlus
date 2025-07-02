@@ -93,8 +93,6 @@ public class UserController {
     @GetMapping("/serving")
     public String userServing(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User currentUser = (User) userDetails;
-        /*List<Serving> servings = servingService.findAllByOwner(currentUser);*/
-        /*model.addAttribute("servings", servings);*/
         return "profile/serving_list";
     }
 

@@ -106,15 +106,6 @@
                        th:classappend="${sortField == 'name' and sortDir == 'asc'} ? ' active' : ''">Имя ↑</a></li>
                 <li><a class="dropdown-item" th:href="@{/patient(sortField='name', sortDir='desc')}"
                        th:classappend="${sortField == 'name' and sortDir == 'desc'} ? ' active' : ''">Имя ↓</a></li>
-                <!--<li><a class="dropdown-item" th:href="@{/patient(sortField='ownerType', sortDir='asc')}"
-                       th:classappend="${sortField == 'ownerType' and sortDir == 'asc'} ? ' active' : ''">Тип владельца ↑</a></li>
-                <li><a class="dropdown-item" th:href="@{/patient(sortField='ownerType', sortDir='desc')}"
-                       th:classappend="${sortField == 'ownerType' and sortDir == 'desc'} ? ' active' : ''">Тип владельца ↓</a></li>
-                <li><a class="dropdown-item" th:href="@{/patient(sortField='company', sortDir='asc')}"
-                       th:classappend="${sortField == 'company' and sortDir == 'asc'} ? ' active' : ''">Компания ↑</a></li>
-                <li><a class="dropdown-item" th:href="@{/patient(sortField='company', sortDir='desc')}"
-                       th:classappend="${sortField == 'company' and sortDir == 'desc'} ? ' active' : ''">Компания ↓</a></li>
-                <li><hr class="dropdown-divider"></li>-->
                 <li><a class="dropdown-item" th:href="@{/patient}"
                        th:classappend="${sortField == null} ? ' active' : ''">Без сортировки</a></li>
             </ul>

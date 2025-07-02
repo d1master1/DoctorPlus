@@ -23,8 +23,4 @@ public class DoctorDTO {
     private String speciality;
     @NotEmpty(message = "Специализация не может быть пустым")
     private String schedule;
-
-    /*@NotEmpty(message = "Номер телефона не может быть пустым")
-    @Size(min = 3, max = 10, message = "От 3 до 10 символов")
-    private String phone;*/
 }

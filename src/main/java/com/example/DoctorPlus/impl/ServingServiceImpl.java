@@ -58,11 +58,6 @@ public class ServingServiceImpl implements ServingService {
                 .orElseThrow(() -> new IllegalArgumentException("Доктор не найден"));
     }
 
-    /*@Override
-    public List<Serving> findAllByOwner(User owner) {
-        return servingRepo.findAllByOwner(owner);
-    }*/
-
     @Override
     public void deleteById(Long id) {
         servingRepo.deleteById(id);

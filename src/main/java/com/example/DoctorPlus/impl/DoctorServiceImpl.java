@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,11 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepo doctorRepo;
     private final AppointmentRepo dealRepo;
+
+    @Override
+    public Optional<Doctor> getDoctorByIdOptional(Long id) {
+        return doctorRepo.findById(id); // Возвращаем Optional
+    }
 
     @Override
     public List<Doctor> getAllDoctorSortedBy(String sortBy) {
@@ -41,8 +47,9 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public void saveDoctor(Doctor doctor) {
+    public Doctor saveDoctor(Doctor doctor) {
         doctorRepo.save(doctor);
+        return doctor;
     }
 
     @Override

@@ -24,4 +24,6 @@ public interface UserService {
     Optional<User> findByUsername(String username);
     User save(User user);
     String saveAvatarFile(MultipartFile file);
+
+    User update(UserDTO userDTO);
 }

@@ -7,7 +7,6 @@ import com.example.DoctorPlus.repo.PatientRepo;
 import com.example.DoctorPlus.repo.ServingRepo;
 import com.example.DoctorPlus.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -22,12 +21,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DoctorRepo doctorRepository;
 
     @Override
-    public List<Appointment> getAllAppointments(Sort sort) {
-        return appointmentRepository.findAll(sort);
+    public boolean existsById(Long id) {
+        return appointmentRepository.existsById(id);
     }
 
     @Override
-    public void saveAppointment(Appointment appointment) {
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
+    }
+
+    @Override
+    public Appointment saveAppointment(Appointment appointment) {
         if (appointment.getServing() != null && appointment.getServing().getId() != null) {
             Serving serving = servingRepository.findById(appointment.getServing().getId()).orElse(null);
             appointment.setServing(serving);
@@ -44,6 +48,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         appointmentRepository.save(appointment);
+        return appointment;
     }
 
     @Override

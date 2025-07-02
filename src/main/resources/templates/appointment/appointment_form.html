@@ -10,130 +10,85 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<div th:replace="~{/include/header}"></div>
+<main class="flex-grow-1 d-flex align-items-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-4">
+                        <h1 class="text-center mb-4" th:text="${appointment.id == null} ? 'Добавить запись на прием' : 'Редактировать запись на прием'">
+                            Запись на приём
+                        </h1>
 
-<main class="flex-grow-1">
-    <div class="container mt-5">
-        <h1 th:text="${appointment.id == null} ? 'Добавить запись на прием' : 'Редактировать запись на прием'"></h1>
+                        <form th:action="@{/appointment/save}" th:object="${appointment}" method="post" novalidate>
+                            <input type="hidden" th:field="*{id}" />
 
-        <form th:action="@{/appointment/save}" th:object="${appointment}" method="post" novalidate>
-            <input type="hidden" th:field="*{id}" />
-            <!-- Услуги -->
-            <div class="mb-3">
-                <label for="servingSelect" class="form-label">Услуги</label>
-                <select th:field="*{serving.id}" class="form-select" id="servingSelect" onchange="updateServingFields()" required>
-                    <option value="" disabled th:selected="*{serving == null}">-- Выберите Услугу --</option>
-                    <option th:each="serving : ${servings}"
-                            th:value="${serving.id}"
-                            th:text="${serving.name + ', ' + serving.description + ', ' + serving.cost}">
-                    </option>
-                </select>
-                <div class="invalid-feedback">Пожалуйста, выберите услугу.</div>
+                            <!-- Услуги -->
+                            <div class="mb-3">
+                                <label for="servingSelect" class="form-label">Услуги</label>
+                                <select th:field="*{serving.id}" class="form-select w-100" id="servingSelect" onchange="updateServingFields()" required>
+                                    <option value="" disabled th:selected="*{serving == null}">-- Выберите Услугу --</option>
+                                    <option th:each="serving : ${servings}"
+                                            th:value="${serving.id}"
+                                            th:text="${serving.name + ', ' + serving.description + ', ' + serving.cost}">
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">Пожалуйста, выберите услугу.</div>
+                            </div>
+
+                            <!-- Пациент -->
+                            <div class="mb-3">
+                                <label for="patientSelect" class="form-label">Пациент</label>
+                                <select th:field="*{patient.id}" class="form-select w-100" id="patientSelect" onchange="updatePatientFields()" required>
+                                    <option value="" disabled th:selected="*{patient == null}">-- Выберите пациента --</option>
+                                    <option th:each="patient : ${patients}"
+                                            th:value="${patient.id}"
+                                            th:text="${patient.fullName}">
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">Пожалуйста, выберите пациента.</div>
+                            </div>
+
+                            <!-- Доктор -->
+                            <div class="mb-3">
+                                <label for="doctorSelect" class="form-label">Доктор</label>
+                                <select th:field="*{doctor.id}" class="form-select w-100" id="doctorSelect" required>
+                                    <option value="" disabled th:selected="*{doctor == null}">-- Выберите доктора --</option>
+                                    <option th:each="doctor : ${doctors}"
+                                            th:value="${doctor.id}"
+                                            th:text="${doctor.fullName}">
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">Пожалуйста, выберите доктора.</div>
+                            </div>
+
+                            <!-- Дата -->
+                            <div class="mb-3">
+                                <label for="dateField" class="form-label">Дата записи</label>
+                                <input type="datetime-local" th:field="*{date}" id="dateField" class="form-control w-100" required />
+                                <div class="invalid-feedback">Пожалуйста, укажите дату записи.</div>
+                            </div>
+
+                            <!-- Статус -->
+                            <div class="mb-3">
+                                <label for="statusField" class="form-label">Статус</label>
+                                <select th:field="*{status}" id="statusField" class="form-select w-100" required>
+                                    <option value="" th:selected="${appointment.status == null}" disabled>Выберите статус</option>
+                                    <option value="Активный" th:selected="${appointment.status == 'Активный'}">Активный</option>
+                                    <option value="Неактивный" th:selected="${appointment.status == 'Неактивный'}">Неактивный</option>
+                                </select>
+                                <div class="invalid-feedback">Выберите пожалуйста статус.</div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-between mt-4">
+                                <button type="submit" class="btn btn-primary">Сохранить</button>
+                                <a th:href="@{/appointment}" class="btn btn-secondary">Отмена</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-            <!-- Пациент -->
-            <div class="mb-3">
-                <label for="patientSelect" class="form-label">Пациент</label>
-                <select th:field="*{patient.id}" class="form-select" id="patientSelect" onchange="updatePatientFields()" required>
-                    <option value="" disabled th:selected="*{patient == null}">-- Выберите пациента --</option>
-                    <option th:each="patient : ${patients}"
-                            th:value="${patient.id}"
-                            th:text="${patient.fullName}">
-                    </option>
-                </select>
-                <div class="invalid-feedback">Пожалуйста, выберите пациента.</div>
-            </div>
-
-            <!--&lt;!&ndash; Телефон пациента (только для чтения) &ndash;&gt;
-            <div class="mb-3">
-                <label for="patientPhoneField" class="form-label">Телефон пациента</label>
-                <input type="text" id="patientPhoneField" class="form-control" readonly />
-            </div>
-
-            &lt;!&ndash; Скрытое поле для телефона пациента &ndash;&gt;
-            <input type="hidden" th:field="*{phone}" />-->
-
-            <!-- Доктор -->
-            <div class="mb-3">
-                <label for="doctorSelect" class="form-label">Доктор</label>
-                <select th:field="*{doctor.id}" class="form-select" id="doctorSelect" required>
-                    <option value="" disabled th:selected="*{doctor == null}">-- Выберите доктора --</option>
-                    <option th:each="doctor : ${doctors}"
-                            th:value="${doctor.id}"
-                            th:text="${doctor.fullName}">
-                    </option>
-                </select>
-                <div class="invalid-feedback">Пожалуйста, выберите доктора.</div>
-            </div>
-
-            <!--&lt;!&ndash; Владелец &ndash;&gt;
-            <div class="mb-3">
-                <label for="ownerField" class="form-label">Владелец</label>
-                <input type="text" id="ownerField" class="form-control" readonly />
-            </div>
-
-            &lt;!&ndash; Сумма &ndash;&gt;
-            <div class="mb-3">
-                <label for="amountField" class="form-label">Сумма (₽)</label>
-                <input type="text" th:field="*{amount}" id="amountField" class="form-control" readonly />
-            </div>
-
-            &lt;!&ndash; Клиент &ndash;&gt;
-            <div class="mb-3">
-                <label for="clientSelect" class="form-label">Клиент</label>
-                <select th:field="*{client.id}" class="form-select" id="clientSelect" onchange="updateClientFields()" required>
-                    <option value="" disabled th:selected="*{client == null}">&#45;&#45; Выберите клиента &#45;&#45;</option>
-                    <option th:each="client : ${clients}"
-                            th:value="${client.id}"
-                            th:text="${client.fullName}">
-                    </option>
-                </select>
-                <div class="invalid-feedback">Пожалуйста, выберите клиента.</div>
-            </div>
-
-            &lt;!&ndash; Телефон клиента &ndash;&gt;
-            <div class="mb-3">
-                <label for="clientNumberField" class="form-label">Телефон клиента</label>
-                <input type="text" id="clientNumberField" class="form-control" readonly />
-            </div>
-
-            &lt;!&ndash; Скрытое поле для телефона клиента &ndash;&gt;
-            <input type="hidden" th:field="*{number}" />
-
-            &lt;!&ndash; Сотрудник &ndash;&gt;
-            <div class="mb-3">
-                <label for="employeeSelect" class="form-label">Сотрудник</label>
-                <select th:field="*{employee.id}" class="form-select" id="employeeSelect" required>
-                    <option value="" disabled th:selected="*{employee == null}">&#45;&#45; Выберите сотрудника &#45;&#45;</option>
-                    <option th:each="employee : ${employees}"
-                            th:value="${employee.id}"
-                            th:text="${employee.lastName + ' ' + employee.firstName + ' (' + employee.position + ')'}">
-                    </option>
-                </select>
-                <div class="invalid-feedback">Пожалуйста, выберите сотрудника.</div>
-            </div>-->
-
-            <!-- Дата -->
-            <div class="mb-3">
-                <label for="dateField" class="form-label">Дата сделки</label>
-                <input type="datetime-local" th:field="*{date}" id="dateField" class="form-control" required />
-                <div class="invalid-feedback">Пожалуйста, укажите дату сделки.</div>
-            </div>
-
-            <!-- Статус -->
-            <div class="mb-3">
-                <label for="statusField" class="form-label">Статус</label>
-                <select th:field="*{status}" id="statusField" class="form-control" required>
-                    <option value="" th:selected="${appointment.status == null}" disabled>Выберите статус</option>
-                    <option value="Активный" th:selected="${appointment.status == 'Активный'}">Активный</option>
-                    <option value="Неактивный" th:selected="${appointment.status == 'Неактивный'}">Неактивный</option>
-                </select>
-                <div class="invalid-feedback">Выберите пожалуйста статус сделки.</div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a th:href="@{/appointment}" class="btn btn-secondary ms-2">Отмена</a>
-        </form>
+        </div>
     </div>
 </main>
 
@@ -148,8 +103,6 @@
         const servingData = JSON.parse(data || "[]");
         const selectedId = document.getElementById("servingSelect").value;
         const serving = servingData.find(r => r.id == selectedId);
-        /*document.getElementById("ownerField").value = realty?.ownerName || "";
-        document.getElementById("amountField").value = realty?.cost || "";*/
     }
 
     function updatePatientFields() {
@@ -158,8 +111,6 @@
         const patientData = JSON.parse(data || "[]");
         const selectedId = document.getElementById("patientSelect").value;
         const patient = patientData.find(p => p.id == selectedId);
-        /*document.getElementById("patientPhoneField").value = patient?.phone || "";
-        document.querySelector("[name='phone']").value = patient?.phone || "";*/
     }
 
     document.addEventListener("DOMContentLoaded", function () {

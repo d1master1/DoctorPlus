@@ -16,10 +16,4 @@ public class AppointmentDTO {
     private LocalDate date;
     @NotEmpty(message = "Статус сделки не может быть пустым")
     private String status;
-
-    /*@NotEmpty(message = "Номер телефона не может быть пустым")
-    @Size(min = 3, max = 10, message = "От 3 до 10 символов")
-    private String number;
-    @NotEmpty(message = "Цена не может быть пустым")
-    private double amount;*/
 }

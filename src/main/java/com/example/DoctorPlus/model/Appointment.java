@@ -23,9 +23,6 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*private Long amount;
-    private String number;*/
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serving_id")
     private Serving serving;
@@ -57,20 +54,4 @@ public class Appointment {
         }
         return "—";
     }
-
-    /*@Transient
-    public String getFormattedCost() {
-        if (amount == null) return "—";
-
-        long value = amount;
-        if (value < 100_000) {
-            return value + " ₽";
-        } else if (value < 1_000_000) {
-            return (value / 1_000) + " тыс. ₽";
-        } else if (value < 1_000_000_000) {
-            return String.format("%.1f млн. ₽", value / 1_000_000.0);
-        } else {
-            return String.format("%.1f млрд ₽", value / 1_000_000_000.0);
-        }
-    }*/
 }

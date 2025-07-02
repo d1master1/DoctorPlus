@@ -99,14 +99,6 @@
                 Сортировка
             </button>
             <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                <!--<li>
-                    <a class="dropdown-item" th:href="@{/appointment(sortField='amount', sortDir='asc')}"
-                       th:classappend="${(sortField == 'amount' and sortDir == 'asc') ? ' active' : ''}">Сумма ↑</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" th:href="@{/appointment(sortField='amount', sortDir='desc')}"
-                       th:classappend="${(sortField == 'amount' and sortDir == 'desc') ? ' active' : ''}">Сумма ↓</a>
-                </li>-->
                 <li>
                     <a class="dropdown-item" th:href="@{/appointment(sortField='date', sortDir='asc')}"
                        th:classappend="${(sortField == 'date' and sortDir == 'asc') ? ' active' : ''}">Дата ↑</a>
@@ -146,7 +138,6 @@
             <td th:text="${appointment?.doctor?.fullName}">—</td>
             <td th:text="${appointment?.patient?.fullName}">—</td>
             <td th:text="${appointment?.serving?.name + ', ' + appointment?.serving?.description  + ', ' + appointment?.serving?.cost}">—</td>
-            <!--<td th:text="${appointment.formattedCost}"></td>-->
             <td sec:authorize="hasAnyRole('EMPLOYEE','ADMIN')">
                 <a th:href="@{/appointment/edit/{id}(id=${appointment.id})}" class="btn btn-edit btn-sm me-1">Изменить</a>
                 <form th:action="@{/appointment/delete/{id}(id=${appointment.id})}" method="post"

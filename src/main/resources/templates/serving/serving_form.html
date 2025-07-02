@@ -9,127 +9,48 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<div th:replace="~{/include/header}"></div>
+<main class="flex-grow-1 d-flex align-items-center">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-header text-center">
+                        <h1 class="mb-0" th:text="${#strings.isEmpty(serving.id)} ? 'Добавить медицинскую услугу' : 'Редактировать медицинскую услугу'">
+                            Медицинская услуга
+                        </h1>
+                    </div>
+                    <form th:action="@{/serving/save}" th:object="${serving}" method="post" novalidate>
+                        <div class="card-body">
 
-<main class="flex-grow-1">
-    <div class="container mt-5">
-        <form th:action="@{/serving/save}" th:object="${serving}" method="post" novalidate>
-            <div class="card">
-                <div class="card-header">
-                    <h1 th:text="${#strings.isEmpty(serving.id)} ? 'Добавить медицинскую услугу' : 'Редактировать медицинскую услугу'"></h1>
-                </div>
-                <div class="card-body">
+                            <input type="hidden" th:field="*{id}"/>
 
-                    <input type="hidden" th:field="*{id}"/>
+                            <!-- Название услуги -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Название услуги:</label>
+                                <input type="text" class="form-control w-100" id="name" th:field="*{name}" required/>
+                            </div>
 
-                    <div class="row">
-                        <div class="mb-3 col-12 col-md-12 col-lg-6">
-                            <label for="name" class="form-label">Название услуги:</label>
-                            <input type="text" class="form-control" id="name" th:field="*{name}" required/>
+                            <!-- Описание услуги -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Описание услуги:</label>
+                                <input type="text" class="form-control w-100" id="description" th:field="*{description}" required/>
+                            </div>
+
+                            <!-- Стоимость -->
+                            <div class="mb-3">
+                                <label for="cost" class="form-label">Стоимость (₽):</label>
+                                <input type="number" step="0.01" class="form-control w-100" id="cost" th:field="*{cost}" required min="0"/>
+                            </div>
+
                         </div>
-
-                        <div class="mb-3 col-12 col-md-12 col-lg-6">
-                            <label for="description" class="form-label">Описание услуги:</label>
-                            <input type="text" class="form-control" id="description" th:field="*{description}" required/>
+                        <div class="card-footer d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a th:href="@{/serving}" class="btn btn-secondary">Отмена</a>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="cost" class="form-label">Стоимость (₽):</label>
-                        <input type="number" step="0.01" class="form-control" id="cost" th:field="*{cost}" required
-                               min="0"/>
-                    </div>
-
-                    <!--<div class="mb-3">
-                        <label for="street" class="form-label">Улица:</label>
-                        <input type="text" class="form-control" id="street" th:field="*{street}" required/>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="rooms" class="form-label">Комнаты:</label>
-                        <input type="number" class="form-control" id="rooms" th:field="*{rooms}" required min="1"/>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="floors" class="form-label">Этажи:</label>
-                        <input type="number" class="form-control" id="floors" th:field="*{floors}" min="0"/>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="square" class="form-label">Площадь (м²):</label>
-                        <input type="number" step="0.01" class="form-control" id="square" th:field="*{square}" required
-                               min="0"/>
-                    </div>
-
-                    &lt;!&ndash; Тип ремонта &ndash;&gt;
-                    <div class="mb-3">
-                        <label for="repair" class="form-label">Тип ремонта:</label>
-                        <select th:field="*{repair}" id="repair" class="form-control" required>
-                            <option value="Косметический">Косметический</option>
-                            <option value="Капитальный">Капитальный</option>
-                            <option value="Евроремонт">Евроремонт</option>
-                            <option value="Дизайнерский">Дизайнерский</option>
-                            <option value="Ремонт класса «люкс»">Ремонт класса «люкс»</option>
-                            <option value="Частичный">Частичный</option>
-                        </select>
-                        <div class="invalid-feedback">Выберите пожалуйста тип ремонта.</div>
-                    </div>
-
-                    &lt;!&ndash; Чекбоксы &ndash;&gt;
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="elevator" th:field="*{elevator}"/>
-                        <label class="form-check-label" for="elevator">Лифт</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="playground" th:field="*{playground}"/>
-                        <label class="form-check-label" for="playground">Детская площадка</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="trashChute" th:field="*{trashChute}"/>
-                        <label class="form-check-label" for="trashChute">Мусоропровод</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="parking" th:field="*{parking}"/>
-                        <label class="form-check-label" for="parking">Парковка</label>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="balcony" th:field="*{balcony}"/>
-                        <label class="form-check-label" for="balcony">Балкон</label>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="client" class="form-label">Клиент:</label>
-                        <select class="form-select" id="client" th:field="*{client}">
-                            <option value="">&#45;&#45; Выберите клиента &#45;&#45;</option>
-                            <option th:each="client : ${clients}" th:value="${client.id}"
-                                    th:text="${client.fullName}"></option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="owner" class="form-label">Владелец недвижимости:</label>
-                        <select class="form-select" id="owner" th:field="*{owner}" required>
-                            <option value="">&#45;&#45; Выберите владельца &#45;&#45;</option>
-                            <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.fullName}"></option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="deal" class="form-label">Запись на прием:</label>
-                        <select class="form-select" id="deal" th:field="*{deal}">
-                            <option value="">-- Выберите запись на прием --</option>
-                            <option th:each="deal : ${deals}" th:value="${deal.id}"
-                                    th:text="${deal.id} + ' — ' + deal.formattedDate + ' — ' + deal.formattedCost"></option>
-                        </select>
-                    </div>-->
-
-                </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                    <a th:href="@{/serving}" class="btn btn-secondary ms-2">Отмена</a>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </main>
 

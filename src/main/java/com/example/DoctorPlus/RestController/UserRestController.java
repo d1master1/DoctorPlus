@@ -1,45 +1,67 @@
-/*
 package com.example.DoctorPlus.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import com.example.DoctorPlus.dto.UserDTO;
+import com.example.DoctorPlus.model.Role;
+import com.example.DoctorPlus.model.User;
+import com.example.DoctorPlus.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.example.terranova.dto.UserDTO;
-import org.example.terranova.model.Role;
-import org.example.terranova.model.User;
-import org.example.terranova.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "Пользователи", description = "API для управления пользователями")
+@RequestMapping("/api/users")
 public class UserRestController {
 
     private final UserService userService;
 
-    @Operation(summary = "Получить список всех пользователей",
-            description = "Возвращает список пользователей с возможностью сортировки",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешный ответ",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = UserDTO.class)))
-            })
+    // Получить всех пользователей
     @GetMapping
-    public List<UserDTO> getAllUsers(
-            @Parameter(description = "Параметр сортировки: username_asc, username_desc, name_asc, name_desc")
-            @RequestParam(value = "sort", required = false) String sort) {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<User> users = userService.findAll();
+        List<UserDTO> userDTOs = users.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userDTOs);
+    }
 
+    // Получить пользователя по ID
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(convertToDTO(user));
+    }
+
+    // Создать нового пользователя
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+        User savedUser = userService.save(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedUser));
+    }
+
+    // Обновить пользователя
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        userDTO.setId(id);
+        User updatedUser = userService.update(userDTO);
+        return ResponseEntity.ok(convertToDTO(updatedUser));
+    }
+
+    // Удалить пользователя
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Сортировка пользователей
+    @GetMapping("/sorted")
+    public ResponseEntity<List<UserDTO>> getUsersSorted(@RequestParam(name = "sort", required = false) String sort) {
         List<User> users = switch (sort != null ? sort.toLowerCase() : "") {
             case "username_asc" -> userService.findAllOrderByUsernameAsc();
             case "username_desc" -> userService.findAllOrderByUsernameDesc();
@@ -48,67 +70,34 @@ public class UserRestController {
             default -> userService.findAll();
         };
 
-        return users.stream().map(UserDTO::fromEntity).toList();
+        List<UserDTO> userDTOs = users.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDTOs);
     }
 
-    @Operation(summary = "Создать нового пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Пользователь создан"),
-                    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
-            })
-    @PostMapping
-    public ResponseEntity<String> createUser(@Valid @RequestBody UserDTO userDTO) {
-        userService.save(userDTO);
-        return ResponseEntity.status(201).body("Пользователь успешно создан");
+    // Получить все доступные роли
+    @GetMapping("/roles")
+    public ResponseEntity<Set<String>> getAllRoles() {
+        Set<String> roleNames = Set.of(Role.values())
+                .stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+        return ResponseEntity.ok(roleNames);
     }
 
-    @Operation(summary = "Обновить роли пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Роли пользователя обновлены"),
-                    @ApiResponse(responseCode = "404", description = "Пользователь не найден")
-            })
-    @PutMapping("/{id}/roles")
-    public ResponseEntity<String> updateUserRoles(
-            @PathVariable Long id,
-            @RequestBody Set<String> roleNames) {
-
-        Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            try {
-                roles.add(Role.valueOf(roleName));
-            } catch (IllegalArgumentException ignored) {
-                // Можно логировать ошибку
-            }
-        }
-        userService.updateUserRoles(id, roles);
-        return ResponseEntity.ok("Роли пользователя обновлены");
-    }
-
-    @Operation(summary = "Удалить пользователя по ID",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Пользователь удалён"),
-                    @ApiResponse(responseCode = "404", description = "Пользователь не найден")
-            })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Получить пользователя по ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Пользователь найден",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = UserDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Пользователь не найден")
-            })
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        User user = userService.findById(id);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(UserDTO.fromEntity(user));
+    // Приватный метод: конвертация User → UserDTO
+    private UserDTO convertToDTO(User user) {
+        return new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getSurname(),
+                user.getRoles()
+                        .stream()
+                        .map(r -> r.name().toUpperCase())
+                        .collect(Collectors.toSet())
+        );
     }
 }
-*/

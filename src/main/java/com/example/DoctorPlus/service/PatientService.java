@@ -9,7 +9,7 @@ public interface PatientService {
     List<Patient> findAll();
     List<Patient> findAllSortedByField(String fieldName, String sortDirection);
     Optional<Patient> findById(Long id);
-    void save(Patient patient);
+    Patient save(Patient patient);
     void deleteById(Long id);
     void deleteAll();
     boolean deleteByIdIfPossible(Long id);

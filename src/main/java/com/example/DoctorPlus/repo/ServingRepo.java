@@ -9,13 +9,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
 public interface ServingRepo extends JpaRepository<Serving, Long> {
     List<Serving> findByPatient(Patient patient);
-    /*List<Serving> findAllByOwner(User owner);*/
     @Query("SELECT s FROM Serving s WHERE s.patient.user = :user")
     List<Serving> findAllByPatientUser(@Param("user") User user);
     // Удалить все объекты, ID которых не входят в переданный список
