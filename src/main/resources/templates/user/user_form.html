@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Частная клиника «DoctorPlus» — Редактирование пользователя</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .sidebar {
+            width: 180px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #ddd;
+            height: 100vh;
+            position: fixed;
+            padding-top: 1rem;
+        }
+        .sidebar .nav-link {
+            margin: 0.3rem 0;
+        }
+        .header {
+            height: 56px;
+            padding: 0 1rem;
+            background-color: #e9ecef;
+            border-bottom: 1px solid #ddd;
+            margin-left: 180px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .header .btn {
+            min-width: 100px;
+        }
+        .content {
+            margin-left: 180px;
+            margin-top: 56px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Боковое меню -->
+<div th:replace="~{/include/sidebar :: sidebar}"></div>
+
+<header class="header d-flex align-items-center justify-content-between">
+    <div>Частная клиника «DoctorPlus» — Редактирование пользователя</div>
+</header>
+
+<main class="content">
+    <div class="container mt-3">
+        <h2 class="mb-4">Редактирование пользователя</h2>
+
+        <form th:action="@{/user/update}" th:object="${user}" method="post">
+            <input type="hidden" th:field="*{id}" />
+            <div>
+                <label>Роли:</label>
+                <div th:each="role : ${allRoles}">
+                    <input type="checkbox" name="roles"
+                           th:value="${role.name()}"
+                           th:checked="${user.roles.contains(role)}" />
+                    <span th:text="${role.name()}"></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

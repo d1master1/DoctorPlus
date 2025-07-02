@@ -1,0 +1,57 @@
+<div th:fragment="header" xmlns:sec="http://www.thymeleaf.org" xmlns:th="http://www.thymeleaf.org">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+
+            <a class="navbar-brand" href="/">Частная клиника «DoctorPlus»</a>
+
+            <div class="d-flex align-items-center">
+                <!-- Кнопки "Главная" и "Профиль" -->
+                <a class="btn btn-outline-primary me-2" href="/" role="button">Главная</a>
+                <a class="btn btn-outline-primary me-4" th:href="@{/profile}" role="button" sec:authorize="isAuthenticated()">Профиль</a>
+                <a class="btn btn-outline-primary me-4" th:href="@{/about}" role="button">О системе</a>
+            </div>
+
+            <!-- Ссылки на разделы -->
+            <ul class="navbar-nav flex-row flex-wrap">
+                <li class="nav-item me-3">
+                    <a class="nav-link" th:href="@{/serving}">Медицинские услуги</a>
+                </li>
+                <li class="nav-item me-3">
+                    <a class="nav-link" th:href="@{/appointment}">Записи на прием</a>
+                </li>
+                <li class="nav-item me-3" sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')">
+                    <a class="nav-link" th:href="@{/patient}">Пациенты</a>
+                </li>
+                <li class="nav-item me-3" sec:authorize="hasAnyRole( 'ADMIN')">
+                    <a class="nav-link" th:href="@{/doctor}">Доктора</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/user}">Пользователи</a>
+                </li>
+            </ul>
+
+            <!-- Панель авторизации -->
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/include/login}">Вход</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/include/registration}">Регистрация</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger ms-2">Выход</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+</div>
